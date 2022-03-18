@@ -1,0 +1,80 @@
+﻿@using ConaviWeb.Model
+@model IEnumerable<Module>
+
+
+<nav class="navbar">
+    <!--<nav class="navbar navbar-inverse navbar-fixed-top">-->
+    @*<button type="button" class="btnMenu navbar-toggle collapsed" data-toggle="collapse" data-target="#navbarToggler" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"><i class="fa fas fa-bars ic-menu"></i></span>
+        </button>*@
+    <div class="container">
+
+
+        <div class="hamburger">
+            <div class="line1" style="font-size:1px !important"></div>
+            <div class="line2"></div>
+            <div class="line3"></div>
+        </div>
+        @*<ul class="nav-links">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Solutions</a></li>
+            <li><a href="#">Products</a></li>
+            <li><a href="#">Services</a></li>
+            <li><a href="#">Contact Us</a></li>
+            <li><button class="login-button" href="#">Login</button></li>
+            <li><button class="join-button" href="#">Join</button></li>
+        </ul>*@
+        @*<div class="row nav-container">
+            <div class="col-md-6">*@
+                <ul class="nav-links">
+
+                    @if (Model as List<Module> != null)
+                    {
+                        @foreach (var module in Model as List<Module>)
+                        {
+                            <li>
+                                <a href="@module.Url">
+                                    <span class="@module.Ico"></span><span>@module.Text</span>
+                                </a>
+                            </li>
+                        }
+                    }
+
+                @*</ul>
+            </div>*@
+            @*<div class="col-md-6" >
+                <ul class="nav-links">*@
+                    @if (User.Identity.IsAuthenticated)
+                    {
+
+                        <li><a><span class="fa fa-user"></span><span>@User.Identity.Name</span></a></li>
+                        <li><a href="../LogOut"><span class="fa fa-sign-out"></span><span>Salir</span></a></li>
+
+                    }
+
+                </ul>
+            @*</div>*@
+        @*</div>
+    </div>*@
+    </nav>
+
+<script>
+    const hamburger = document.querySelector(".hamburger");
+    const navLinks = document.querySelector(".nav-links");
+    const links = document.querySelectorAll(".nav-links li");
+
+    hamburger.addEventListener('click', () => {
+        //Animate Links
+        navLinks.classList.toggle("open");
+
+        links.forEach(link => {
+            link.classList.toggle("fade");
+            
+        });
+
+        //Hamburger Animation
+        hamburger.classList.toggle("toggle");
+        
+    });
+</script>
+
