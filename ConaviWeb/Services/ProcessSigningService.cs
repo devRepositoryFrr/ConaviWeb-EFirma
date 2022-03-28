@@ -5,6 +5,8 @@ using ConaviWeb.Model.Response;
 using ConaviWeb.Tools;
 using iText.IO.Font.Constants;
 using iText.IO.Image;
+using iText.Kernel.Colors;
+using iText.Kernel.Events;
 using iText.Kernel.Font;
 using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
@@ -99,7 +101,7 @@ namespace ConaviWeb.Services
                         {
                             file.Id = file.IdPadre;
                         }
-                        success = await FirmaDocumentoAsync(pathFile, fileDoc, fileCert, archivoKey, file.Id, user, file.IdPartition);
+                        success = await FirmaDocumentoAsync(pathFile, fileDoc, fileCert, archivoKey, file.Id, user, file.IdPartition, file.NuFirma);
                     }
 
 
@@ -107,7 +109,7 @@ namespace ConaviWeb.Services
             }
             return success;
         }
-        private async Task<bool> FirmaDocumentoAsync(string pathDoc, byte[] fileDoc, byte[] fileCert, AsymmetricKeyParameter archivoKey, int idArchivoPadre, User user, int idPartition)
+        private async Task<bool> FirmaDocumentoAsync(string pathDoc, byte[] fileDoc, byte[] fileCert, AsymmetricKeyParameter archivoKey, int idArchivoPadre, User user, int idPartition, int nuFirma)
         {
 
 
@@ -138,12 +140,12 @@ namespace ConaviWeb.Services
                         QRCodeGenerator qrGenerator = new();
                         QRCodeData qrCodeData = qrGenerator.CreateQrCode(datosfea.CadenaOriginal, QRCodeGenerator.ECCLevel.Q);
                         QRCode qrcode = new QRCode(qrCodeData);
-                        Bitmap qrCodeImage = qrcode.GetGraphic(5, Color.Black, Color.White, null, 15, 6, false);
+                        Bitmap qrCodeImage = qrcode.GetGraphic(5, System.Drawing.Color.Black, System.Drawing.Color.White, null, 15, 6, false);
                         string QrName = System.IO.Path.GetFileNameWithoutExtension(pathXML) + ".jpg";
                         string routeQR = System.IO.Path.Combine(_environment.WebRootPath, "doc","EFirma", QrName);
                         qrCodeImage.Save(routeQR);//write your path where you want to store the qr-code image.
                         //Genera reporte pdf con sello
-                        success = await EditPDFAsync(pathDoc, routeQR, idArchivoPadre, datosfea, user, shorthPathXML, XMLName, partition);
+                        success = await EditPDFAsync(pathDoc, routeQR, idArchivoPadre, datosfea, user, shorthPathXML, XMLName, partition, nuFirma);
 
                     }
 
@@ -294,7 +296,7 @@ namespace ConaviWeb.Services
 
 
 
-        public async Task<bool> EditPDFAsync(string pathDoc, string routeQR, int idArchivoPadre, DatosCadenaOriginal datosfea, User user,string shorthPathXML, string XMLName, Partition partition)
+        public async Task<bool> EditPDFAsync(string pathDoc, string routeQR, int idArchivoPadre, DatosCadenaOriginal datosfea, User user, string shorthPathXML, string XMLName, Partition partition, int nuFirma)
         {
             DateTime dateTime = DateTime.Now;
             //Logica Recursos Humanos
@@ -310,7 +312,7 @@ namespace ConaviWeb.Services
                 shortPath = System.IO.Path.Combine("doc", "EFirma", "Firmado", dateTime.Year.ToString(), dateTime.Month.ToString(), partition.Text);
                 partitionPath = System.IO.Path.Combine("doc", "EFirma", "Firmado", dateTime.Year.ToString(), dateTime.Month.ToString());
             }
-            
+
             SigningFile signingFile = new();
             signingFile.SignatureDate = datosfea.TimeStampSign;
             signingFile.Folio = datosfea.Folio;
@@ -326,65 +328,292 @@ namespace ConaviWeb.Services
             string fileName = System.IO.Path.GetFileNameWithoutExtension(pathDoc);
             signingFile.FileName = fileName + "_" + dateTime.ToString("ddMMyyHHmmss") + ".pdf";
             string pdfresult = System.IO.Path.Combine(filePath, signingFile.FileName);
-            // Initialize PDF document
 
-            PdfReader reader = new PdfReader(System.IO.File.OpenRead(pathDoc));
-            PdfDocument pdf = new PdfDocument(reader, new PdfWriter(pdfresult));
-
-            // Initialize document
-            Document document = new Document(pdf);
-            bool success;
-            try
+            bool success = false;
+            //int nuFirma = 3;
+            var numeroFirma = nuFirma + 1;
+            if (numeroFirma == 1)
             {
-                // Add content
-                pdf.SetDefaultPageSize(PageSize.LETTER);
-                pdf.AddNewPage();
+                PdfReader reader = new PdfReader(System.IO.File.OpenRead(pathDoc));
+                PdfDocument pdfDoc = new PdfDocument(reader, new PdfWriter(pdfresult));
+                Document document = new Document(pdfDoc);
+                var iHeader = System.IO.Path.Combine(_environment.WebRootPath, "img", "headerConavi.png");
+                var iFooter = System.IO.Path.Combine(_environment.WebRootPath, "img", "footerConavi.png");
+                pdfDoc.AddEventHandler(PdfDocumentEvent.END_PAGE, new TextFooterEventHandler(document, iHeader, iFooter));
+                //pdfDoc.AddNewPage();
                 document.Add(new AreaBreak(AreaBreakType.LAST_PAGE));
-
-
-                PdfFont font_title = PdfFontFactory.CreateFont(StandardFonts.TIMES_BOLD);
-                PdfFont font_content = PdfFontFactory.CreateFont(StandardFonts.COURIER);
-                string tipoFirmante = user.Area.ToString();
-                Text title1 = new Text("Cadena original").SetFont(font_title).SetFontSize(8);
-                Text content1 = new Text(signingFile.OriginalString).SetFont(font_content).SetFontSize(6);
-                Text title2 = new Text("Firma electrónica " + tipoFirmante).SetFont(font_title).SetFontSize(8);
-                Text content2 = new Text(signingFile.SignatureStamp).SetFont(font_content).SetFontSize(6);
-                Paragraph p1 = new Paragraph().Add(title1).SetTextAlignment(TextAlignment.JUSTIFIED);
-                Paragraph p2 = new Paragraph().Add(content1).SetTextAlignment(TextAlignment.JUSTIFIED);
-                Paragraph p3 = new Paragraph().Add(title2).SetTextAlignment(TextAlignment.JUSTIFIED);
-                Paragraph p4 = new Paragraph().Add(content2).SetTextAlignment(TextAlignment.JUSTIFIED);
-
-                // Upload image
-                ImageData imageData = ImageDataFactory.Create(routeQR);
-                iText.Layout.Element.Image image = new iText.Layout.Element.Image(imageData).ScaleAbsolute(60, 60);
-
-                // Table Cadena y QR
-                Table table = new Table(2);
-                table.SetWidth(500);
-                table.SetTextAlignment(TextAlignment.JUSTIFIED);
-                table.AddCell(new Cell().Add(p2).SetBorder(Border.NO_BORDER));
-                table.AddCell(new Cell().Add(image).SetBorder(Border.NO_BORDER));
-
-                // This adds the image to the page
-                document.Add(p1).Add(table).Add(p3).Add(p4.SetWidth(430));
-                //Close document
+                document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+                //MARGEN DEL DOCUMENTO
+                document.SetMargins(70, 50, 70, 50);
+                GenPDF(document, signingFile, routeQR, user);
                 document.Close();
-                //Delete QR
-                if (File.Exists(routeQR))
-                {
-                    File.Delete(routeQR);
-                }
-                success = await _processSignRepository.InsertSigningFile(signingFile, user, idArchivoPadre, shorthPathXML, XMLName, partition);
-                if (partition.PathPartition == null)
-                {
-                    partition.PathPartition = partitionPath;
-                    await _sourceFileRepository.UpdateParition(partition);
-                }
-
             }
-            catch { success = false; }
+            else
+            {
+                PdfReader reader = new PdfReader(System.IO.File.OpenRead(pathDoc));
+                PdfDocument pdfDoc = new PdfDocument(reader, new PdfWriter(pdfresult));
+                Document document = new Document(pdfDoc);
+                document.Add(new AreaBreak(AreaBreakType.LAST_PAGE));
+                //MARGEN DEL DOCUMENTO
+                document.SetMargins(70, 50, 70, 50);
+                GenPDF(document, numeroFirma, signingFile, routeQR, user);
+                document.Close();
+            }
+
+            //Delete QR
+            if (File.Exists(routeQR))
+            {
+                File.Delete(routeQR);
+            }
+            success = await _processSignRepository.InsertSigningFile(signingFile, user, idArchivoPadre, shorthPathXML, XMLName, partition);
+            if (partition.PathPartition == null)
+            {
+                partition.PathPartition = partitionPath;
+                await _sourceFileRepository.UpdateParition(partition);
+            }
             return success;
         }
+        public Document GenPDF(Document document, SigningFile signingFile, string routeQR, User user)
+        {
+
+
+            PdfFont font_title = PdfFontFactory.CreateFont(StandardFonts.TIMES_BOLD);
+            PdfFont font_content = PdfFontFactory.CreateFont(StandardFonts.COURIER);
+            PdfFont fonte = PdfFontFactory.CreateFont(StandardFonts.TIMES_ROMAN);
+            PdfFont fonts = PdfFontFactory.CreateFont(StandardFonts.TIMES_BOLD);
+
+
+            Table firma = new Table(1, true);
+            firma.SetBorder(Border.NO_BORDER);
+            firma.SetRelativePosition(0, 40, 0, 200);
+            Cell Firmante = new Cell(1, 1)
+                 .SetTextAlignment(TextAlignment.LEFT)
+                 .SetFont(font_title)
+                 .SetFontSize(7)
+                 .SetHeight(10)
+                 .SetFontColor(new DeviceRgb(130, 27, 63))
+                 .SetWidth(100)
+                 .SetBorder(Border.NO_BORDER)
+                 .SetBorderLeft(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                 .SetBorderTop(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                 .SetBorderRight(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                 .SetVerticalAlignment((VerticalAlignment.MIDDLE))
+                 .Add(new Paragraph("Firmante: " + user.Name + " " + user.LName + " " + user.SLName));
+
+            Cell hCadenaOriginal = new Cell(1, 1)
+                  .SetTextAlignment(TextAlignment.LEFT)
+                  .SetFont(font_title)
+                  .SetFontSize(7)
+                  .SetHeight(10)
+                  .SetWidth(100)
+                  .SetBorder(Border.NO_BORDER)
+                  .SetBorderLeft(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                  .SetBorderTop(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                  .SetBorderRight(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                  .SetVerticalAlignment((VerticalAlignment.MIDDLE))
+                  .Add(new Paragraph("Cadena Original"));
+            Cell cadenaOriginal = new Cell(1, 1)
+                .SetBorderLeft(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                .SetBorderRight(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                .SetBorder(Border.NO_BORDER)
+                .Add(new Paragraph(signingFile.OriginalString))//cadena original
+                .SetFont(font_content)
+                .SetFontSize(6)
+                .SetWidth(10)
+                .SetTextAlignment(TextAlignment.JUSTIFIED)
+                .SetHeight(40);
+            Cell hFirmaEConavi = new Cell(1, 1)
+             .SetTextAlignment(TextAlignment.LEFT)
+             .SetFont(font_title)
+             .SetFontSize(7)
+             .SetBorder(Border.NO_BORDER)
+             .SetWidth(10)
+             .SetBorderLeft(new SolidBorder(ColorConstants.BLACK, 0.1f))
+             .SetBorderRight(new SolidBorder(ColorConstants.BLACK, 0.1f))
+             .SetHeight(10)
+             .SetVerticalAlignment((VerticalAlignment.MIDDLE))
+             .Add(new Paragraph("Firma electrónica "));
+            Cell firmaEConavi = new Cell(1, 1).SetBorder(Border.NO_BORDER)
+                   .Add(new Paragraph(signingFile.SignatureStamp))//sello
+                   .SetFont(font_content)
+                   .SetFontSize(6)
+                   .SetBorderRight(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                   .SetBorderLeft(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                   .SetBorder(Border.NO_BORDER)
+                   .SetWidth(10)
+                   .SetTextAlignment(TextAlignment.JUSTIFIED)
+                   .SetHeight(40);
+            // Upload image
+            ImageData imageData = ImageDataFactory.Create(routeQR);
+            iText.Layout.Element.Image image = new iText.Layout.Element.Image(imageData).ScaleAbsolute(60, 60);
+            Cell imagenqr = new Cell(1, 1)
+           .SetBorder(Border.NO_BORDER)
+           .SetBorderLeft(new SolidBorder(ColorConstants.BLACK, 0.1f))
+           .SetBorderRight(new SolidBorder(ColorConstants.BLACK, 0.1f))
+           .SetBorderBottom(new SolidBorder(ColorConstants.BLACK, 0.1f))
+           .SetHeight(60)
+           .Add(image);
+            Cell ultima = new Cell(1, 1).SetBorder(Border.NO_BORDER);
+
+            firma.AddCell(Firmante);
+            firma.AddCell(hCadenaOriginal);
+            firma.AddCell(cadenaOriginal);
+            firma.AddCell(hFirmaEConavi);
+            firma.AddCell(firmaEConavi);
+            firma.AddCell(imagenqr);
+            firma.AddCell(ultima);
+            document.Add(firma);
+            document.Close();
+            return document;
+        }
+
+        public Document GenPDF(Document document, int nuFirma, SigningFile signingFile, string routeQR, User user)
+        {
+
+
+            PdfFont font_title = PdfFontFactory.CreateFont(StandardFonts.TIMES_BOLD);
+            PdfFont font_content = PdfFontFactory.CreateFont(StandardFonts.COURIER);
+            PdfFont fonte = PdfFontFactory.CreateFont(StandardFonts.TIMES_ROMAN);
+            PdfFont fonts = PdfFontFactory.CreateFont(StandardFonts.TIMES_BOLD);
+
+
+            Table firma = new Table(1, true);
+            firma.SetBorder(Border.NO_BORDER);
+            var position = nuFirma == 2 ? 240 : 440;
+            firma.SetRelativePosition(0, position, 0, 200);
+
+            Cell Firmante = new Cell(1, 1)
+                 .SetTextAlignment(TextAlignment.LEFT)
+                 .SetFont(font_title)
+                 .SetFontSize(7)
+                 .SetHeight(10)
+                 .SetFontColor(new DeviceRgb(130, 27, 63))
+                 .SetWidth(100)
+                 .SetBorder(Border.NO_BORDER)
+                 .SetBorderLeft(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                 .SetBorderTop(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                 .SetBorderRight(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                 .SetVerticalAlignment((VerticalAlignment.MIDDLE))
+                 .Add(new Paragraph("Firmante: " + user.Name + " " + user.LName + " " + user.SLName));
+
+            Cell hCadenaOriginal = new Cell(1, 1)
+                  .SetTextAlignment(TextAlignment.LEFT)
+                  .SetFont(font_title)
+                  .SetFontSize(7)
+                  .SetHeight(10)
+                  .SetWidth(100)
+                  .SetBorder(Border.NO_BORDER)
+                  .SetBorderLeft(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                  .SetBorderTop(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                  .SetBorderRight(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                  .SetVerticalAlignment((VerticalAlignment.MIDDLE))
+                  .Add(new Paragraph("Cadena Original"));
+            Cell cadenaOriginal = new Cell(1, 1)
+                .SetBorderLeft(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                .SetBorderRight(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                .SetBorder(Border.NO_BORDER)
+                .Add(new Paragraph(signingFile.OriginalString))//cadena original
+                .SetFont(font_content)
+                .SetFontSize(6)
+                .SetWidth(10)
+                .SetTextAlignment(TextAlignment.JUSTIFIED)
+                .SetHeight(40);
+            Cell hFirmaEConavi = new Cell(1, 1)
+             .SetTextAlignment(TextAlignment.LEFT)
+             .SetFont(font_title)
+             .SetFontSize(7)
+             .SetBorder(Border.NO_BORDER)
+             .SetWidth(10)
+             .SetBorderLeft(new SolidBorder(ColorConstants.BLACK, 0.1f))
+             .SetBorderRight(new SolidBorder(ColorConstants.BLACK, 0.1f))
+             .SetHeight(10)
+             .SetVerticalAlignment((VerticalAlignment.MIDDLE))
+             .Add(new Paragraph("Firma electrónica "));
+            Cell firmaEConavi = new Cell(1, 1).SetBorder(Border.NO_BORDER)
+                   .Add(new Paragraph(signingFile.SignatureStamp))//sello
+                   .SetFont(font_content)
+                   .SetFontSize(6)
+                   .SetBorderRight(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                   .SetBorderLeft(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                   .SetBorder(Border.NO_BORDER)
+                   .SetWidth(10)
+                   .SetTextAlignment(TextAlignment.JUSTIFIED)
+                   .SetHeight(40);
+            // Upload image
+            ImageData imageData = ImageDataFactory.Create(routeQR);
+            iText.Layout.Element.Image image = new iText.Layout.Element.Image(imageData).ScaleAbsolute(60, 60);
+            Cell imagenqr = new Cell(1, 1)
+           .SetBorder(Border.NO_BORDER)
+           .SetBorderLeft(new SolidBorder(ColorConstants.BLACK, 0.1f))
+           .SetBorderRight(new SolidBorder(ColorConstants.BLACK, 0.1f))
+           .SetBorderBottom(new SolidBorder(ColorConstants.BLACK, 0.1f))
+           .SetHeight(60)
+           .Add(image);
+            Cell ultima = new Cell(1, 1).SetBorder(Border.NO_BORDER);
+
+            firma.AddCell(Firmante);
+            firma.AddCell(hCadenaOriginal);
+            firma.AddCell(cadenaOriginal);
+            firma.AddCell(hFirmaEConavi);
+            firma.AddCell(firmaEConavi);
+            firma.AddCell(imagenqr);
+            firma.AddCell(ultima);
+            document.Add(firma);
+            document.Close();
+            return document;
+        }
+        private class TextFooterEventHandler : IEventHandler
+        {
+            protected Document doc;
+            protected string _header;
+            protected string _footer;
+
+            public TextFooterEventHandler(Document doc, string iHeader, string iFooter)
+            {
+                this.doc = doc;
+                _header = iHeader;
+                _footer = iFooter;
+            }
+
+            public void HandleEvent(Event currentEvent)
+            {
+                PdfDocumentEvent docEvent = (PdfDocumentEvent)currentEvent;
+                //Rectangle pageSize = docEvent.GetPage().GetPageSize();
+                PdfDocument pdfDoc = docEvent.GetDocument();
+                PdfPage page = docEvent.GetPage();
+                iText.Kernel.Geom.Rectangle pageSize = page.GetPageSize();
+                int pageNumber = pdfDoc.GetPageNumber(page);
+                int pagesNumber = pdfDoc.GetNumberOfPages();//pdfDoc.GetPageNumber(page);
+                if (pagesNumber != pageNumber)
+                {
+                    return;
+                }
+                PdfFont font = null;
+                try
+                {
+                    font = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_OBLIQUE);
+                }
+                catch (IOException e)
+                {
+                    Console.Error.WriteLine(e.Message);
+                }
+
+                Canvas canvas = new Canvas(docEvent.GetPage(), pageSize);
+                canvas
+                    .Close();
+                iText.Layout.Element.Image img = new iText.Layout.Element.Image(ImageDataFactory
+                .Create(_header))
+                .SetTextAlignment(TextAlignment.CENTER);
+                canvas.Add(img);
+                iText.Layout.Element.Image footer = new iText.Layout.Element.Image(ImageDataFactory
+                  .Create(_footer))
+                  .SetFixedPosition(10, 0)
+                  .ScaleAbsolute(580, 70)
+                  .SetTextAlignment(TextAlignment.CENTER);
+                canvas.Add(footer);
+            }
+        }
+            
 
         public DatosCertificado.datosgeneralescertificado ObtenCertificado(X509Certificate archivoCer, int idUsuario, string rfcRequest)
         {

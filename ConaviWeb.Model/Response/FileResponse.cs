@@ -13,6 +13,7 @@ namespace ConaviWeb.Model.Response
         public string FileName { get; set; }
         public DateTime DateUpload { get; set; }
         public string Status { get; set; }
+        public int NuFirma { get; set; }
         public int IdPartition { get; set; }
         public int IdPadre { get; set; }
     }
