@@ -341,8 +341,11 @@ namespace ConaviWeb.Services
                 var iFooter = System.IO.Path.Combine(_environment.WebRootPath, "img", "footerConavi.png");
                 pdfDoc.AddEventHandler(PdfDocumentEvent.END_PAGE, new TextFooterEventHandler(document, iHeader, iFooter));
                 //pdfDoc.AddNewPage();
+                iText.Kernel.Geom.Rectangle mediabox = pdfDoc.GetPage(1).GetMediaBox();
+                Console.WriteLine(mediabox);
+                var a = new PageSize(mediabox);
                 document.Add(new AreaBreak(AreaBreakType.LAST_PAGE));
-                document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+                document.Add(new AreaBreak(a));
                 //MARGEN DEL DOCUMENTO
                 document.SetMargins(70, 50, 70, 50);
                 GenPDF(document, signingFile, routeQR, user);
