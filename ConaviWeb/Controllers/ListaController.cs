@@ -25,8 +25,10 @@ namespace ConaviWeb.Controllers
             _processSignRepository = processSignRepository;
         }
         [Route("List")]
-        public IActionResult Index()
+        public async Task<IActionResult> IndexAsync()
         {
+            User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+            TempData["Sistema"] = user.IdSystem;
             if (TempData.ContainsKey("Alert"))
                 ViewBag.Alert = TempData["Alert"].ToString();
             return View("../EFirma/Lista");
@@ -41,7 +43,7 @@ namespace ConaviWeb.Controllers
 
             //if (user.Rol.ToString() == "FirmanteInterno")
             //{
-                files = await _processSignRepository.GetFiles(user.IdSystem, IdEstatus);
+                files = await _processSignRepository.GetFiles(user.IdSystem, IdEstatus, Convert.ToInt32(user.Rol), user.RFC);
 
 
             //}

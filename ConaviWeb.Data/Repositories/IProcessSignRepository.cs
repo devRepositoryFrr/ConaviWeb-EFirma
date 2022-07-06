@@ -10,7 +10,7 @@ namespace ConaviWeb.Data.Repositories
 {
     public interface IProcessSignRepository
     {
-        Task<IEnumerable<FileResponse>> GetFiles(int idSystem, int Estatus);
+        Task<IEnumerable<FileResponse>> GetFiles(int idSystem, int Estatus, int idRol, string rfc);
         Task<IEnumerable<FileResponse>> GetSignedFiles(int idSystem);
         Task<IEnumerable<FileResponse>> GetSignedFilesCancel(int idSystem);
         Task<IEnumerable<FileResponse>> GetPartitionFiles(int idPartition);

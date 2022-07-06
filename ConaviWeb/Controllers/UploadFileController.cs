@@ -65,7 +65,7 @@ namespace ConaviWeb.Controllers
             var sessionData = HttpContext.Session.GetObject<UserResponse>("ComplexObject");
             //Logica Recursos Humanos
             string shortPath = "";
-            if (sessionData.IdSistema == 4)
+            if (sessionData.IdSistema == 4 || sessionData.IdSistema == 5)
             {
                 shortPath = Path.Combine("doc", "EFirma", "Original", partition.Text);
             }

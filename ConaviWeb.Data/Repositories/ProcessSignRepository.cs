@@ -22,14 +22,14 @@ namespace ConaviWeb.Data.Repositories
         {
             return new MySqlConnection(_connectionString.ConnectionString);
         }
-        public async Task<IEnumerable<FileResponse>> GetFiles(int idSystem, int estatus)
+        public async Task<IEnumerable<FileResponse>> GetFiles(int idSystem, int estatus, int idRol, string rfc)
         {
             var db = DbConnection();
 
             var sql = @"
-                        CALL sp_get_files(@IdSystem, @Estatus)";
+                        CALL sp_get_files2(@IdSystem, @Estatus, @IdRol, @RFC)";
 
-            return await db.QueryAsync<FileResponse>(sql, new { IdSystem = idSystem , Estatus = estatus });
+            return await db.QueryAsync<FileResponse>(sql, new { IdSystem = idSystem , Estatus = estatus, IdRol = idRol, RFC = rfc });
         }
         public async Task<IEnumerable<FileResponse>> GetSignedFiles(int idSystem)
         {

@@ -1,0 +1,169 @@
+﻿@model ConaviWeb.Model.Request.CreateUser
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "Registro usuarios";
+}
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-12">
+                @Html.Raw(@ViewBag.Alert)
+            </div>
+        </div>
+        <form id="form_registro" asp-action="AddUser" asp-controller="CreateUser">
+            <div class="modulos-dac  " id="RegistroUsrs">
+                <div class="login-in top-buffer-x5">
+                    <h4 id="nameSystem" style="text-align: center; margin-bottom: 25px;">Registro de usuarios</h4>
+                    <hr class="red" />
+                    <label>Nombre:</label>
+                    <input placeholder="Escriba su nombre" id="nombres" asp-for="Nombre" type="text" class="form-control" />
+                    <span asp-validation-for="Nombre" class="text-danger"></span>
+                    <br>
+                    <label>Primer Apellido:</label>
+                    <input placeholder="Escriba su primer Apellido" id="primerApe" asp-for="PApellido" type="text" class="form-control" />
+                    <span asp-validation-for="PApellido" class="text-danger"></span>
+                    <br>
+                    <label>Segundo Apellido:</label>
+                    <input placeholder="Escriba su segundo Apellido" id="segundoApe" asp-for="SApellido" type="text" class="form-control" />
+                    <span asp-validation-for="SApellido" class="text-danger"></span>
+                    <br />
+                    <label> Correo electrónico:</label>
+                    <input placeholder=" Especifica tu Correo Electrónico" id="correo" asp-for="Email" type="email" class="form-control" autocomplete="off" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                    <br>
+                    <label>Usuario:</label>
+                    <input placeholder="Especifica tu usuario" id="Usuario" asp-for="Usuario" type="text" class="form-control" autocomplete="off">
+                    <span asp-validation-for="Usuario" class="text-danger"></span>
+                    <br />
+                    <label>Contraseña:</label>
+                    <input placeholder="Especifica tu contraseña" id="Password" asp-for="Password" type="password" class="form-control" autocomplete="off">
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                    <br>
+                    <input placeholder="Confirma tu contraseña" id="ConfirmPassword" name="Password1" type="password" class="form-control" autocomplete="off">
+                    <span id="msg"></span>
+                    <br />
+                    <label>RFC:</label>
+                    <input type="text" id="rfc_input" style="width:100%;" asp-for="RFC" maxlength="14" oninput="validarInput(this)" class="form-control" placeholder="Ingrese su RFC">
+                    <span asp-validation-for="RFC" class="text-danger"></span>
+                    <span id="resultado"></span>
+                    <span id="estatus"></span>
+                    <br>
+                    <label><i class="fas fa-user-alt gold"></i> DEPENDECIA</label>
+                    <small id="lblDependecia" class="red-text gold hidden">Campo requerido *</small>
+                    <select class="form-control" asp-for="Dependencia">
+                        <option value="">----Seleciona-----</option>
+                        <option value="1">CONAVI</option>
+                        <option value="3">SEDATU</option>
+                        <option value="4">SHCP</option>
+                        <option value="5">INSUS</option>
+                        <option value="6">SFP</option>
+                        <option value="7">OIC</option>
+                    </select>
+                    <span asp-validation-for="Dependencia" class="text-danger"></span>
+                    <div class="col-md-4">
+                        <button type='submit' class="btn btn-primary .btn-xs text-center form-control top-buffer " id="btnSubmit">REGISTRAR</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+@section Scripts {@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}}
+<script>
+
+    $(document).ready(function () {
+        showAlert();
+        $("#btnSubmit").attr("disabled", true);
+        $("#ConfirmPassword").keyup(function () {
+            if ($("#Password").val() != $("#ConfirmPassword").val()) {
+                $("#msg").html("La contraseña no coincide").css("color", "#a94442").css("font-weight", "bold");
+                $("#btnSubmit").attr("disabled", true);
+            } else {
+                $("#msg").html("La contraseña coincide").css("color", "#215d51").css("font-weight", "bold");
+                $("#btnSubmit").attr("disabled", false);
+            }
+        });
+
+    });
+
+    function showAlert() {
+        setTimeout(function () {
+            $("#alerta").fadeOut(1500);
+
+        }, 6000);
+
+
+        setTimeout(function () {
+
+            $("#alerta").remove();
+        }, 12000);
+
+    }
+
+    function rfcValido(rfc, aceptarGenerico = true) {
+        const re = /^([A-ZÑ&]{3,4}) ?(?:- ?)?(\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])) ?(?:- ?)?([A-Z\d]{2})([A\d])$/;
+        var validado = rfc.match(re);
+
+        if (!validado)  //Coincide con el formato general del regex?
+            return false;
+
+        //Separar el dígito verificador del resto del RFC
+        const digitoVerificador = validado.pop(), rfcSinDigito = validado.slice(1).join(''), len = rfcSinDigito.length,
+
+            //Obtener el digito esperado
+            diccionario = "0123456789ABCDEFGHIJKLMN&OPQRSTUVWXYZ Ñ", indice = len + 1;
+        var suma, digitoEsperado;
+
+        if (len == 12) suma = 0
+        else suma = 481; //Ajuste para persona moral
+
+        for (var i = 0; i < len; i++)
+            suma += diccionario.indexOf(rfcSinDigito.charAt(i)) * (indice - i);
+        digitoEsperado = 11 - suma % 11;
+        if (digitoEsperado == 11) digitoEsperado = 0;
+        else if (digitoEsperado == 10) digitoEsperado = "A";
+
+        //El dígito verificador coincide con el esperado?
+        // o es un RFC Genérico (ventas a público general)?
+        if ((digitoVerificador != digitoEsperado)
+            && (!aceptarGenerico || rfcSinDigito + digitoVerificador != "XAXX010101000"))
+            return false;
+        else if (!aceptarGenerico && rfcSinDigito + digitoVerificador == "XEXX010101000")
+            return false;
+        return rfcSinDigito + digitoVerificador;
+    }
+
+
+    function validarInput(input) {
+        var rfc = input.value.trim().toUpperCase(), resultado = document.getElementById("resultado"), valido;
+        $("#rfc_input").val(rfc);
+        var rfcCorrecto = rfcValido(rfc);   // ⬅️ Acá se comprueba
+
+        if (rfcCorrecto) {
+            valido = "Válido";
+            resultado.classList.add("ok");
+            $("#resultado").css("color", "#215d51").css("font-weight", "bold");
+        } else {
+            valido = "No válido"
+            resultado.classList.remove("ok");
+            $("#resultado").css("color", "#a94442").css("font-weight", "bold");
+        }
+
+        resultado.innerText = "\RFC: " + valido;
+    }
+
+
+
+
+    $('#rfc_input').on('keypress', function (e) {
+        if (e.which == 32) {
+            console.log('Space Detected');
+            return false;
+        }
+
+    });
+
+
+</script>

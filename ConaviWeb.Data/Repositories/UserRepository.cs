@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ConaviWeb.Model.Request;
 
 namespace ConaviWeb.Data.Repositories
 {
@@ -41,21 +42,57 @@ namespace ConaviWeb.Data.Repositories
             var sql = @"
                          SELECT id Id, nombre Name, primer_apellido LName, segundo_apellido SLName, usuario SUser, id_rol Rol, cargo Position,
                                 numero_empleado EmployeeNumber, rfc RFC, grado_academico Degree, fecha_alta CreateDate, integrador Integrador, 
-                                id_sistema IdSystem, area Area, firmante Signer, activo Active
+                                id_sistema IdSystem, area Area, firmante Signer, activo Active, posicion_firma PFirma
                         FROM usuario
                         WHERE id = @Id";
 
             return await db.QueryFirstOrDefaultAsync<User>(sql, new { Id = id });
         }
 
-        public async Task<bool> InsertUser(User user)
+        public async Task<bool> InsertUser(CreateUser user)
         {
             var db = DbConnection();
 
             var sql = @"
+                        INSERT INTO prod_web_efirma.usuario
+                        (
+                        nombre,
+                        primer_apellido,
+                        segundo_apellido,
+                        usuario,
+                        password,
+                        id_rol,
+                        rfc,
+                        id_sistema,
+                        email,
+                        area)
+                        VALUES
+                        (
+                        @Nombre,
+                        @PApellido,
+                        @SApellido,
+                        @Usuario,
+                        @Password,
+                        @IdRol,
+                        @RFC,
+                        @IdSistema,
+                        @Email,
+                        @Dependencia
+                        );
                         ";
 
-            var result = await db.ExecuteAsync(sql, new {  });
+            var result = await db.ExecuteAsync(sql, new {
+                user.Nombre,
+                user.PApellido,
+                user.SApellido,
+                user.Usuario,
+                user.Password,
+                user.IdRol,
+                user.RFC,
+                user.IdSistema,
+                user.Email,
+                user.Dependencia
+            });
             return result > 0;
         }
 

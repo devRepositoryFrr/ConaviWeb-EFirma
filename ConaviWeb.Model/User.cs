@@ -25,6 +25,7 @@ namespace ConaviWeb.Model
         public int IdSystem { get; set; }
         public string Signer { get; set; }
         public string Active { get; set; }
+        public int PFirma { get; set; }
 
     }
 

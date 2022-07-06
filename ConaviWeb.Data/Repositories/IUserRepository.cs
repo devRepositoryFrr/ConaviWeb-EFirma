@@ -1,4 +1,5 @@
 ﻿using ConaviWeb.Model;
+using ConaviWeb.Model.Request;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace ConaviWeb.Data.Repositories
     {
         Task<IEnumerable<User>> GetAllUsers();
         Task<User> GetUserDetails(int id);
-        Task<bool> InsertUser(User user);
+        Task<bool> InsertUser(CreateUser user);
         Task<bool> UpdateUser(User user);
         Task<bool> DeleteUser(User user);
     }

@@ -19,7 +19,7 @@
             <div class="panel-body">
                 @Html.Raw(@ViewBag.Alert)
                 @*@if (!_signInManager.IsSignedIn(User))
-                    {*@
+            {*@
                 <form method="post" asp-action="Auth">
                     <div class="alert alert-danger" asp-validation-summary="ModelOnly"><button class="close" data-dismiss="alert" aria-hidden="true">&times;</button></div>
 
@@ -39,10 +39,16 @@
                     <button class="btn btn-primary pull-right" type="submit"><span class="fa fa-sign-in"></span>&ensp;Iniciar Sesión</button>
                 </form>
                 @*}
-                    else
-                    {
-                        Context.Response.Redirect("/inicio/Acerca_de");
-                    }*@
+            else
+            {
+                Context.Response.Redirect("/inicio/Acerca_de");
+            }*@
+            </div>
+            <div class="panel-footer">
+                <span>
+                    ¿No estás registrado?
+                </span>
+                <a href="@Url.Action("Index", "CreateUser")">Crear nuevo usuario</a>
             </div>
         </div>
     </div>

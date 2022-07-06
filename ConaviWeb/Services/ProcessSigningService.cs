@@ -302,7 +302,7 @@ namespace ConaviWeb.Services
             //Logica Recursos Humanos
             string shortPath;
             string partitionPath;
-            if (user.IdSystem == 4)
+            if (user.IdSystem == 4 || user.IdSystem == 5)
             {
                 shortPath = System.IO.Path.Combine("doc", "EFirma", "Firmado", partition.Text);
                 partitionPath = System.IO.Path.Combine("doc", "EFirma", "Firmado");
@@ -332,37 +332,177 @@ namespace ConaviWeb.Services
             bool success = false;
             //int nuFirma = 3;
             var numeroFirma = nuFirma + 1;
-            if (numeroFirma == 1)
+            if (user.IdSystem == 5)
             {
+                
                 PdfReader reader = new PdfReader(System.IO.File.OpenRead(pathDoc));
                 PdfDocument pdfDoc = new PdfDocument(reader, new PdfWriter(pdfresult));
                 Document document = new Document(pdfDoc);
-                var iHeader = System.IO.Path.Combine(_environment.WebRootPath, "img", "headerConavi.png");
-                var iFooter = System.IO.Path.Combine(_environment.WebRootPath, "img", "footerConavi.png");
-                pdfDoc.AddEventHandler(PdfDocumentEvent.END_PAGE, new TextFooterEventHandler(document, iHeader, iFooter));
-                //pdfDoc.AddNewPage();
-                iText.Kernel.Geom.Rectangle mediabox = pdfDoc.GetPage(1).GetMediaBox();
-                Console.WriteLine(mediabox);
-                var a = new PageSize(mediabox);
-                document.Add(new AreaBreak(AreaBreakType.LAST_PAGE));
-                document.Add(new AreaBreak(a));
-                //MARGEN DEL DOCUMENTO
-                document.SetMargins(70, 50, 70, 50);
-                GenPDF(document, signingFile, routeQR, user);
+                var totalPages = pdfDoc.GetNumberOfPages();
+                PdfFont font_title = PdfFontFactory.CreateFont(StandardFonts.TIMES_BOLD);
+                PdfFont font_content = PdfFontFactory.CreateFont(StandardFonts.COURIER);
+                int pBottom = 0, nPage = totalPages - 3;
+                switch (user.PFirma)
+                {
+                    case 1:
+                        pBottom = 590;
+                        break;
+                    case 2:
+                        pBottom = 440;
+                        break;
+                    case 3:
+                        pBottom = 270;
+                        break;
+                    case 4:
+                        pBottom = 100;
+                        break;
+                    case 5:
+                        nPage += 1;
+                        pBottom = 610;
+                        break;
+                    case 6:
+                        nPage += 1;
+                        pBottom = 440;
+                        break;
+                    case 7:
+                        nPage += 1;
+                        pBottom = 290;
+                        break;
+                    case 8:
+                        nPage += 1;
+                        pBottom = 140;
+                        break;
+                    case 9:
+                        nPage += 2;
+                        pBottom = 610;
+                        break;
+                    case 10:
+                        nPage += 2;
+                        pBottom = 460;
+                        break;
+                    case 11:
+                        nPage += 2;
+                        pBottom = 300;
+                        break;
+                    case 12:
+                        nPage += 2;
+                        pBottom = 150;
+                        break;
+                    case 13:
+                        nPage += 3;
+                        pBottom = 590;
+                        break;
+                    case 14:
+                        nPage += 3;
+                        pBottom = 420;
+                        break;
+                }
+
+                Table firma = new Table(4, true);
+                firma.SetBorder(Border.NO_BORDER);
+                firma.SetMaxWidth(480);
+                firma.SetFixedPosition(nPage, 55, pBottom, 440);
+
+                Cell hCadenaOriginal = new Cell(1, 4)
+                      .SetTextAlignment(TextAlignment.LEFT)
+                      .SetFont(font_title)
+                      .SetFontSize(7)
+                      .SetHeight(10)
+                      .SetWidth(10)
+                      .SetBorder(Border.NO_BORDER)
+                      //.SetBorderLeft(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                      //.SetBorderTop(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                      //.SetBorderRight(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                      .SetVerticalAlignment((VerticalAlignment.MIDDLE))
+                      .Add(new Paragraph("Cadena Original"));
+                Cell cadenaOriginal = new Cell(1, 3)
+                    //.SetBorderLeft(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                    //.SetBorderRight(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                    .SetBorder(Border.NO_BORDER)
+                    .Add(new Paragraph(signingFile.OriginalString))//cadena original
+                    .SetFont(font_content)
+                    .SetFontSize(6)
+                    .SetTextAlignment(TextAlignment.JUSTIFIED)
+                    .SetHeight(40)
+                    .SetWidth(20);
+
+                Cell hFirmaEConavi = new Cell(1, 4)
+                 .SetTextAlignment(TextAlignment.LEFT)
+                 .SetFont(font_title)
+                 .SetFontSize(7)
+                 .SetBorder(Border.NO_BORDER)
+                 //.SetBorderLeft(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                 //.SetBorderRight(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                 .SetHeight(10)
+                 .SetWidth(10)
+                 .SetVerticalAlignment((VerticalAlignment.MIDDLE))
+                 .Add(new Paragraph("Firma electrónica "));
+                Cell firmaEConavi = new Cell(1, 3)
+                    //.SetBorderLeft(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                    //.SetBorderRight(new SolidBorder(ColorConstants.BLACK, 0.1f))
+                    .SetBorder(Border.NO_BORDER)
+                    .Add(new Paragraph(signingFile.SignatureStamp))//Sello
+                    .SetFont(font_content)
+                    .SetFontSize(6)
+                    .SetTextAlignment(TextAlignment.JUSTIFIED)
+                    .SetHeight(40);
+                // Upload image
+                ImageData imageData = ImageDataFactory.Create(routeQR);
+                iText.Layout.Element.Image image = new iText.Layout.Element.Image(imageData).ScaleAbsolute(40, 40);
+                Cell imagenqr = new Cell(1, 1)
+                .SetTextAlignment(TextAlignment.RIGHT)
+                .SetVerticalAlignment(VerticalAlignment.MIDDLE)
+               .SetBorder(Border.NO_BORDER)
+               .SetMarginLeft(40)
+               //.SetBorderLeft(new SolidBorder(ColorConstants.BLACK, 0.1f))
+               //.SetBorderRight(new SolidBorder(ColorConstants.BLACK, 0.1f))
+               //.SetBorderBottom(new SolidBorder(ColorConstants.BLACK, 0.1f))
+               .SetHeight(40)
+               .Add(image);
+
+                firma.AddCell(hCadenaOriginal);
+                firma.AddCell(cadenaOriginal);
+                firma.AddCell(new Cell(1, 4).SetBorder(Border.NO_BORDER));
+                firma.AddCell(hFirmaEConavi);
+                firma.AddCell(firmaEConavi);
+                firma.AddCell(imagenqr);
+                document.Add(firma);
+
                 document.Close();
             }
             else
             {
-                PdfReader reader = new PdfReader(System.IO.File.OpenRead(pathDoc));
-                PdfDocument pdfDoc = new PdfDocument(reader, new PdfWriter(pdfresult));
-                Document document = new Document(pdfDoc);
-                document.Add(new AreaBreak(AreaBreakType.LAST_PAGE));
-                //MARGEN DEL DOCUMENTO
-                document.SetMargins(70, 50, 70, 50);
-                GenPDF(document, numeroFirma, signingFile, routeQR, user);
-                document.Close();
+                if (numeroFirma == 1)
+                {
+                    PdfReader reader = new PdfReader(System.IO.File.OpenRead(pathDoc));
+                    PdfDocument pdfDoc = new PdfDocument(reader, new PdfWriter(pdfresult));
+                    Document document = new Document(pdfDoc);
+                    var iHeader = System.IO.Path.Combine(_environment.WebRootPath, "img", "headerConavi.png");
+                    var iFooter = System.IO.Path.Combine(_environment.WebRootPath, "img", "footerConavi.png");
+                    pdfDoc.AddEventHandler(PdfDocumentEvent.END_PAGE, new TextFooterEventHandler(document, iHeader, iFooter));
+                    //pdfDoc.AddNewPage();
+                    iText.Kernel.Geom.Rectangle mediabox = pdfDoc.GetPage(1).GetMediaBox();
+                    Console.WriteLine(mediabox);
+                    var a = new PageSize(mediabox);
+                    document.Add(new AreaBreak(AreaBreakType.LAST_PAGE));
+                    document.Add(new AreaBreak(a));
+                    //MARGEN DEL DOCUMENTO
+                    document.SetMargins(70, 50, 70, 50);
+                    GenPDF(document, signingFile, routeQR, user);
+                    document.Close();
+                }
+                else
+                {
+                    PdfReader reader = new PdfReader(System.IO.File.OpenRead(pathDoc));
+                    PdfDocument pdfDoc = new PdfDocument(reader, new PdfWriter(pdfresult));
+                    Document document = new Document(pdfDoc);
+                    document.Add(new AreaBreak(AreaBreakType.LAST_PAGE));
+                    //MARGEN DEL DOCUMENTO
+                    document.SetMargins(70, 50, 70, 50);
+                    GenPDF(document, numeroFirma, signingFile, routeQR, user);
+                    document.Close();
+                }
             }
-
             //Delete QR
             if (File.Exists(routeQR))
             {
