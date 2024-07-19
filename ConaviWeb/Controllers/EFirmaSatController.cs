@@ -48,6 +48,7 @@ namespace ConaviWeb.Controllers
             User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
             IEnumerable<FileResponse> files;
             bool success = false;
+            Response respuesta = new();
             //if (user.Rol.ToString() == "FirmanteInterno")
             //{
                 files = await _processSignRepository.GetFilesForSign(user.IdSystem, dataSignRequest.ArrayFiles, dataSignRequest.Estatus);
@@ -58,11 +59,11 @@ namespace ConaviWeb.Controllers
             //}
             if (files.Any())
             {
-                success = await _processSigningService.ProcessFileSatAsync(user, dataSignRequest, files);
+                respuesta = await _processSigningService.ProcessFileSatAsync(user, dataSignRequest, files);
             }
-            if (!success)
+            if (respuesta.Success == 0)
             {
-                TempData["Alert"] = AlertService.ShowAlert(Alerts.Danger, "Error al firmar " + files.Count() + " archivos.");
+                TempData["Alert"] = AlertService.ShowAlert(Alerts.Danger, respuesta.Message);
                 //return View("../EFirma/Lista");
                 return RedirectToAction("List","Lista");
             }

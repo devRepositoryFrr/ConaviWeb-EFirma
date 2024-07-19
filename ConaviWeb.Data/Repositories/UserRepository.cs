@@ -42,7 +42,7 @@ namespace ConaviWeb.Data.Repositories
             var sql = @"
                          SELECT id Id, nombre Name, primer_apellido LName, segundo_apellido SLName, usuario SUser, id_rol Rol, cargo Position,
                                 numero_empleado EmployeeNumber, rfc RFC, grado_academico Degree, fecha_alta CreateDate, integrador Integrador, 
-                                id_sistema IdSystem, area Area, firmante Signer, activo Active, posicion_firma PFirma
+                                id_sistema IdSystem, area Area, firmante Signer, activo Active, posicion_firma PFirma, t_cargo_comite Cargo
                         FROM usuario
                         WHERE id = @Id";
 

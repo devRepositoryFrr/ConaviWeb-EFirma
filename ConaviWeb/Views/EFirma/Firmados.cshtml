@@ -1,18 +1,16 @@
 ﻿@model ConaviWeb.Model.Request.FileRequest
 @{
-    ViewBag.Title = "Archivos Firmados";
+    ViewBag.Title = "Firmados";
 }
+
+
 <div class="panel panel-default">
     <div class="panel-body">
         <div class="form-row">
-            <div class="form-group col-md-6">
+            <div class="form-group col-md-12">
                 <div id="spinner" class="spinner-border text-primary" role="status">
                     <span class="sr-only">Loading...</span>
                 </div>
-            </div>
-            @*<a id="btnAddProcedure" asp-controller="ListSignedFiles" asp-action="DownloadZipFile">Descargar</a>*@
-            <div class="form-group col-md-6 divUpload">
-                <a class="btn btn-primary pull-right" id="btnAddProcedure" asp-controller="ListSignedFiles" asp-action="DownloadZipFile"><span class="fa fa-cloud-download"></span>&ensp;Descargar</a>
             </div>
         </div>
         <div class="form-row">
@@ -40,10 +38,7 @@
                             NOMBRE
                         </th>
                         <th>
-                            ESTATUS
-                        </th>
-                        <th>
-                            PDF
+                            FIRMADO
                         </th>
                     </tr>
                 </thead>
@@ -61,7 +56,7 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    <script>
+<script>
         var table;
         $(document).ready(function () {
             $("#spinner").hide();
@@ -70,27 +65,20 @@
             $("#btnAddProcedure").attr('href','#');
             $('#slctPartition').on('change', function () {
                 var textValue = this.value;
-                if (textValue == 0) {
-                    $("#btnAddProcedure").attr('href', '#');
-                } else {
-                    //console.log(textValue);
-                    var newhref = oldref + '/' + textValue;
-                    //console.log(newhref);
-
-                    $("#btnAddProcedure").attr("href", newhref);
-                }
 
                 showTable(textValue);
             });
         });
 
         function showTable(textValue) {
+            console.log(textValue);
             $("#spinner").show();
             table = $('#table').DataTable({
                 "proccessing": true,
                 "serverSide": false,
                 "ajax": {
-                    url: "/ListSigned/ListaFirmadosAjax" + '/' + textValue,
+                    url: "@Url.Action("GetFirmados","Firmados")",
+                    data: { idParticion: textValue },
                     type: 'GET',
                     headers: { 'RequestVerificationToken': $('@Html.AntiForgeryToken()').val() },
                     complete: function () {
@@ -99,6 +87,8 @@
                 },
                 "columnDefs": columns,
                 "order": [0],
+                "pageLength": 15,
+                "lengthMenu": [[15, 20, 25, -1], [15, 20, 25, 'Todos']],
                 "autoWidth": true,
                 "destroy": true,
                 "scrollY": '700px',
@@ -132,20 +122,24 @@
             });
         }
         var columns = [
+
+            { "name": "Id", "data": "id", "targets": 0, "visible": false },
+            { "name": "Nombre", "data": "nombre", "targets": 1 },
             {
-                "targets": 3,
+                "targets": 2,
                 "data": null,
                 "render": function (data, type, row, meta) {
-                    //return '<a href="/customers/edit/' + row.id + '">Edit</a> | <a href="/customers/details/' + row.id + '">Details</a> | <a href="/customers/delete/' + row.id + '">Delete</a>';
-                    return '<a href="../' + row.filePath + "/" + row.fileName + '" target="_blank"><i class="fa fa-file-pdf-o gold" style="font-size:25px;"></i></a>';
+                    if (row.firmado == "SI") {
+                        return '<i class="fa fa-check" aria-hidden="true" style="color:#215d51"></i>';
+                    }
+                    else {
+                        return '<i class="fa fa-times" aria-hidden="true" style="color:#661e2c;"></i>';
+                    }
                 },
                 "sortable": false,
                 "className": 'text-center'
-            },
-            { "name": "Id", "data": "id", "targets": 0, "visible": false },
-            { "name": "FileName", "data": "fileName", "targets": 1 },
-            { "name": "Status", "data": "status", "targets": 2 }
+            }
         ];
 
-    </script>
+</script>
 }

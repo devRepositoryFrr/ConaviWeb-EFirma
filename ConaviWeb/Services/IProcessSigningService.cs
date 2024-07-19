@@ -8,6 +8,6 @@ namespace ConaviWeb.Services
 {
     public interface IProcessSigningService
     {
-        Task<bool> ProcessFileSatAsync(User user, DataSignRequest dataSignRequest, IEnumerable<FileResponse> files);
+        Task<Response> ProcessFileSatAsync(User user, DataSignRequest dataSignRequest, IEnumerable<FileResponse> files);
     }
 }

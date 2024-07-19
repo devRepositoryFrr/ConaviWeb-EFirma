@@ -28,15 +28,49 @@
         <div class='modal-header'>
             <h4 id='titulo-modal' style="font-weight: 300">Agregar nueva partición</h4>
         </div>
-        <div class='modal-body' style="height: 200px; overflow-x: hidden; overflow-y: auto;">
+        <div class='modal-body'>
             <div class="row col-md-12">
-                    <label asp-for="Text" style="font-size:18px"></label>
-                    <input id="partitionText" class="form-control" asp-for="Text" autocomplete="off" />
-                    <span asp-validation-for="Text" class="text-danger"></span>
+                <label asp-for="Text" style="font-size:18px"></label>
+                <input id="partitionText" class="form-control" asp-for="Text" autocomplete="off" />
+                <span asp-validation-for="Text" class="text-danger"></span>
             </div>
+            @if (ViewBag.Sistema == 5)
+            {
+                    <div class="row col-md-12">
+                        <label style="font-size:18px">Usuario</label>
+                        <select id="slctUser" class="form-control" asp-items="@(new SelectList((System.Collections.IEnumerable)ViewData["Users"], "Id", "Name"))">
+                            <option value="0">--Select--</option>
+                        </select>
+                    </div>
+                    <div class="row col-md-12">
+                        <label style="font-size:18px">Función dentro del Comité</label>
+                        <input type="text" id="funcText" class="form-control"/>
+                    </div>
+                    <div class="row col-md-6" style="margin-top: 25px;">
+                        <button type="button" id="btnAdd" class="btn btn-danger"><i class="fa fa-plus"></i></button>
+                        <button type="button" id="btnRemove" class="btn btn-primary"><i class="fa fa-minus"></i></button>
+                    </div>
+                <div class="row col-md-12">
+                    <span asp-validation-for="JsonUsers" class="text-danger"></span>
+                    <div class="addTask">
+                        <table class="tableUsers table table-striped" style="width: 100%; font-size: 13px">
+                            <thead>
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th style="text-align:center">Posición firma</th>
+                                    <th style="text-align:center">Función</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                <input asp-for="JsonUsers" style="visibility:hidden"/>
+                <input asp-for="Firmas" style="visibility:hidden"/>
+            }
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-default" data-dismiss="modal" id="btnCan">Cancelar</button>
             <button type="submit" class="btn btn-primary">Guardar</button>
         </div>
 </form>
@@ -45,4 +79,61 @@
 
 @section scripts{@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}}
 
-
+<script>
+    $(document).ready(function () {
+        var json = [];
+        var jsonString;
+        var i = 0;
+        $('#btnAdd').click(function () {
+            //i++;
+            var idUser = $('#slctUser').val();
+            var name = $('#slctUser option:selected').text();
+            var cargo = $('#funcText').val();
+            
+            if (idUser > 0 && cargo !='') {
+                i++;
+                json.push({
+                    id_usuario: idUser,
+                    posicion: i,
+                    cargo: cargo
+                });
+                var fixingContent =
+                    '<tr><td>' + name + '</td>' + '<td style="text-align:center">' + i + '</td>' + '<td style="text-align:center">'+ cargo +'</td></tr>';
+                $('.tableUsers').append(fixingContent);
+                $('#slctUser').val(0);
+                $('#funcText').val('');
+                
+                jsonString = JSON.stringify(json);
+                $('#JsonUsers').val(jsonString);
+                $('#Firmas').val(i);
+                console.log("JSON: ", jsonString, " FIRMAS", i)
+            }
+        })
+        $('#btnRemove').click(function () {
+            json = [];
+            jsonString = '';
+            $('#slctUser').val(0);
+            $('#funcText').val('');
+            $(".tableUsers > tbody").html('');
+            $('#JsonUsers').val('');
+            $('#Firmas').val('');
+            i = 0;
+        })
+        $('#btnCan').click(function () {
+            json = [];
+            jsonString = '';
+            $('#slctUser').val(0);
+            $('#funcText').val('');
+            $(".tableUsers > tbody").html('');
+            $('#JsonUsers').val('');
+            $('#Firmas').val('');
+            $('#partitionText').val('');
+            i = 0;
+        })
+        $("#slctUser").on("change", function () {
+            let option = $("#slctUser option:selected").text();
+            let funct = option.split("-").pop()
+            $('#funcText').val($.trim(funct));
+        });
+    })
+</script>

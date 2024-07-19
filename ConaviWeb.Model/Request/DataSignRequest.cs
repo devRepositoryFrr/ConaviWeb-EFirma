@@ -5,8 +5,10 @@ namespace ConaviWeb.Model.Request
 {
     public class DataSignRequest
     {
+        [Required(ErrorMessage = "El campo {0} es requerido")]
         [Display(Name = "Archivo .key")]
         public IFormFile KeySat { get; set; }
+        [Required(ErrorMessage = "El campo {0} es requerido")]
         [Display(Name = "Archivo .cer")]
         public IFormFile CerSat { get; set; }
         [DataType(DataType.Password)]

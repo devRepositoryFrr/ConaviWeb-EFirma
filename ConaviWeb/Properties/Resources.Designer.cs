@@ -123,6 +123,26 @@ namespace ConaviWeb.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        public static byte[] AC6_SAT {
+            get {
+                object obj = ResourceManager.GetObject("AC6_SAT", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] AC7 {
+            get {
+                object obj = ResourceManager.GetObject("AC7", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         public static byte[] ARC0_IES {
             get {
                 object obj = ResourceManager.GetObject("ARC0_IES", resourceCulture);
@@ -260,6 +280,26 @@ namespace ConaviWeb.Properties {
         public static byte[] ocsp_ac5_sat {
             get {
                 object obj = ResourceManager.GetObject("ocsp_ac5_sat", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] OCSP_AC6_SAT {
+            get {
+                object obj = ResourceManager.GetObject("OCSP_AC6_SAT", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] OCSP_AC7_SAT {
+            get {
+                object obj = ResourceManager.GetObject("OCSP_AC7_SAT", resourceCulture);
                 return ((byte[])(obj));
             }
         }

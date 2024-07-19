@@ -1,6 +1,10 @@
             /* The Modal (background) */
-            
-            .modal {
+            .modal-body {
+                position: relative;
+                height: 400px;
+                overflow-y: scroll;
+            }
+            /*.modal {
                 display: none;
                 position: fixed;
                 z-index: 2;
@@ -9,16 +13,21 @@
                 overflow: auto;
                 background-color: rgb(0, 0, 0);
                 background-color: rgba(0, 0, 0, 0.4);
-            }
+            }*/
             /* Modal Content */
             
-            .modal-header {
+            /*.modal-header {
                 text-align: center;
                 vertical-align: middle;
                 background-color: #393C3E;
                 padding: 15px;
                 margin-bottom: 1px;
             }
+
+.modal-body {
+    max-height: calc(100vh - 210px);
+    overflow-y: auto;
+}
             
             .modal-content {
                 overflow: auto;
@@ -34,10 +43,10 @@
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-            }
+            }*/
             /* The Close Button */
             
-            .close {
+            /*.close {
                 color: #aaaaaa;
                 float: right;
                 font-size: 28px;
@@ -55,4 +64,4 @@
                 .modal .modal-content {
                     width: 90%;
                 }
-            }
+            }*/

@@ -15,6 +15,11 @@ namespace ConaviWeb.Data.Repositories
         Task<UserResponse> GetLoginByUserId(int userId);
         Task<IEnumerable<Module>> GetModules(int idRol);
         Task<IEnumerable<Partition>> GetPartitions(int idSystem);
+        Task<IEnumerable<Partition>> GetPartitionsD(int idSystem, int idUser);
         Task<Partition> GetPartition(int idPartition);
+        Task<IEnumerable<User>> GetUsers(int idSystem);
+        Task<Sistema> GetSystem(int idSystem);
+        Task<IEnumerable<Firmados>> GetFirmados(int idParticion);
+        Task<IEnumerable<Partition>> GetPartitionsBaja(int idSystem);
     }
 }

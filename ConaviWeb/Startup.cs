@@ -57,7 +57,11 @@ namespace ConaviWeb
             //Conexion DataBase
             var mySQLConnectionConfig = new MySQLConfiguration(Configuration.GetConnectionString("MySQLConnection"));
             services.AddSingleton(mySQLConnectionConfig);
-            
+
+            //Mail Service
+            services.Configure<MailSetting>(Configuration.GetSection("MailSettings"));
+            services.AddTransient<IMailService, MailService>();
+
             //Dependency 
             services.AddScoped<ISecurityRepository, SecurityRepository>();
             services.AddScoped<ISourceFileRepository, SourceFileRepository>();

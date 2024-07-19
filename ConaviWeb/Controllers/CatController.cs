@@ -30,7 +30,7 @@ namespace ConaviWeb.Controllers
         public async Task<IActionResult> AddItem([FromForm] Partition partition)
         {
             User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
-            bool success = await _sourceFileRepository.InsertPartition(partition.Text, user);
+            bool success = await _sourceFileRepository.InsertPartition(partition.Text, user, partition.JsonUsers, partition.Firmas);
             if (!success)
             {
                 TempData["Alert"] = AlertService.ShowAlert(Alerts.Danger, "Ocurrio un error al registrar la partición");

@@ -22,14 +22,14 @@ namespace ConaviWeb.Data.Repositories
         {
             return new MySqlConnection(_connectionString.ConnectionString);
         }
-        public async Task<IEnumerable<FileResponse>> GetFiles(int idSystem, int estatus, int idRol, string rfc)
+        public async Task<IEnumerable<FileResponse>> GetFiles(int idUser,int idSystem, int estatus, int idRol, string rfc)
         {
             var db = DbConnection();
 
             var sql = @"
-                        CALL sp_get_files2(@IdSystem, @Estatus, @IdRol, @RFC)";
+                        CALL sp_get_files3(@IdUser,@IdSystem, @Estatus, @IdRol, @RFC)";
 
-            return await db.QueryAsync<FileResponse>(sql, new { IdSystem = idSystem , Estatus = estatus, IdRol = idRol, RFC = rfc });
+            return await db.QueryAsync<FileResponse>(sql, new {IdUser = idUser, IdSystem = idSystem , Estatus = estatus, IdRol = idRol, RFC = rfc });
         }
         public async Task<IEnumerable<FileResponse>> GetSignedFiles(int idSystem)
         {
@@ -139,6 +139,24 @@ namespace ConaviWeb.Data.Repositories
             return result > 0;
         }
 
+        public async Task<EmailData> GetDataMail(int idArchivoPadre)
+        {
+            var db = DbConnection();
+
+            var sql = @"
+                        call prod_web_efirma.sp_get_data_mail(@IdArchivoPadre);";
+            return await db.QueryFirstOrDefaultAsync<EmailData>(sql, new { IdArchivoPadre = idArchivoPadre });
+        }
+
+        public async Task<EmailData> GetMailCarga(int idParticion)
+        {
+            var db = DbConnection();
+
+            var sql = @"
+                        call prod_web_efirma.sp_get_mail_carga(@IdParticion);";
+            return await db.QueryFirstOrDefaultAsync<EmailData>(sql, new { IdParticion = idParticion });
+        }
+
         public async Task<bool> InsertCancelFile(SigningFile signingFile, User user, int idArchivoPadre, string currentXML, string XMLName, Partition partition)
         {
             var db = DbConnection();
@@ -164,6 +182,56 @@ namespace ConaviWeb.Data.Repositories
                 PathXML = currentXML,
                 NameXML = XMLName,
                 IdPartition = partition.Id
+            });
+            return result > 0;
+        }
+        public async Task<FileResponse> GetFileDownload(int idParticion)
+        {
+            var db = DbConnection();
+
+            var sql = @"
+                        SELECT ruta_archivo_firma FilePath,nombre_archivo_firma FileName,numero_firma NuFirma from prod_web_efirma.archivo_firma 
+                        WHERE id in (
+                        SELECT max(id) id FROM prod_web_efirma.archivo_firma
+                        WHERE id_particion = @IdParticion);";
+            return await db.QueryFirstOrDefaultAsync<FileResponse>(sql, new { IdParticion = idParticion });
+        }
+        public async Task<IEnumerable<FileResponse>> GetFilesFirmados(int idParticion, int idEstatus, int idSistema)
+        {
+            var db = DbConnection();
+
+            var sql = @"
+                        call prod_web_efirma.sp_get_list_dfirma(@IdParticion, @IdEstatus, @IdSistema);";
+            return await db.QueryAsync<FileResponse>(sql, new { IdParticion = idParticion, IdEstatus = idEstatus, IdSistema = idSistema});
+        }
+
+        public async Task<bool> BajaArchivos(string ids, string obs)
+        {
+            var db = DbConnection();
+
+            var sql = @"
+                        call prod_web_efirma.sp_baja_archivos(
+                        @Ids,@Obs)";
+
+            var result = await db.ExecuteAsync(sql, new
+            {
+                Ids = ids,
+                Obs = obs
+            });
+            return result > 0;
+        }
+        public async Task<bool> BajaParticion(string ids, string obs)
+        {
+            var db = DbConnection();
+
+            var sql = @"
+                        call prod_web_efirma.sp_baja_archivos(
+                        @Ids,@Obs)";
+
+            var result = await db.ExecuteAsync(sql, new
+            {
+                Ids = ids,
+                Obs = obs
             });
             return result > 0;
         }

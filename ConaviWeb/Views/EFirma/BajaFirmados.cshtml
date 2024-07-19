@@ -1,96 +1,126 @@
-﻿@model ConaviWeb.Model.Request.DataSignRequest
+﻿@model ConaviWeb.Model.Request.FileRequest
 @{
-    ViewBag.Title = "Firma";
+    ViewBag.Title = "Baja";
 }
 
 <form id="formSign" class="submit-once" enctype="multipart/form-data" method="post" asp-route="Register">
-    <div class="form-row">
-        <div class="form-group col-md-12">
+    <div class="row">
+        <div class="form-group col-md-4">
+            <div id="spinner" class="spinner-border text-primary" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+        <div class="form-group col-md-4">
+            <div class="form-group" id="alert">
                 @Html.Raw(@ViewBag.Alert)
+            </div>
+        </div>
+        <div class="form-group col-md-4">
+            <button class="btn btn-primary pull-right" id="btnPart" type="button"><i class="fa fa-cloud-upload" aria-hidden="true"></i> Borrar P</button>
+            <button class="btn btn-primary pull-right" id="btnFil" type="button"><i class="fa fa-cloud-upload" aria-hidden="true"></i> Borrar A</button>
         </div>
     </div>
-    @{
-        if (@TempData["Sistema"].ToString() == "4" || @TempData["Sistema"].ToString() == "5")
-        {
-        <div class="form-group row">
-            <div class="col-md-6">
-                    <label>Estatus</label>
-                    <select asp-for="Estatus" id="slctEstatus" class="form-control">
-                        <option value="0">--Select--</option>
-                        <option value="1">Cargado</option>
-                        <option value="2">Parcial</option>
-                    </select>
-            </div>
-            <div class="col-md-6">
-                    <div id="spinner" class="spinner-border text-primary" role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                </div>
-            </div>
-            }
-        }
-            <div class="form-group" id="div_table">
-                <table id="table" class="table" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>
-                                ID
-                            </th>
-                            <th><input type="checkbox" class="master"></th>
-                            <th>
-                                RUTA
-                            </th>
-                            <th>
-                                NOMBRE
-                            </th>
-                            <th>
-                                FECHA CARGA
-                            </th>
-                            <th>
-                                ESTATUS
-                            </th>
-                            <th>
-                                DETALLE
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            </div>
-            <br />
-            <br />
-            <br />
-            @{
-                @await Html.PartialAsync("../EFirma/EFirmaSat")
+    <div class="row">
 
-            }
-        </form>
+        <div class="form-group col-md-4">
+            <div class="alert alert-danger" asp-validation-summary="ModelOnly"><button class="close" data-dismiss="alert" aria-hidden="true">&times;</button></div>
+            <label asp-for="Partition"></label>
+            <select id="slctPartition" class="form-control" asp-for="Partition" asp-items="@(new SelectList((System.Collections.IEnumerable)ViewData["Partitions"], "Id", "Text"))">
+                <option value="">--Select--</option>
+            </select>
+            <span asp-validation-for="Partition" class="text-danger"></span>
+        </div>
+        <div class="form-group col-md-4">
+
+        </div>
+        <div class="form-group col-md-4">
+
+        </div>
+    </div>
+    <div class="form-group" id="div_table">
+        <table id="table" class="table" style="width:100%">
+            <thead>
+                <tr>
+                    <th>
+                        ID
+                    </th>
+                    <th><input type="checkbox" class="master"></th>
+                    <th>
+                        RUTA
+                    </th>
+                    <th>
+                        NOMBRE
+                    </th>
+                    <th>
+                        FECHA CARGA
+                    </th>
+                    <th>
+                        ESTATUS
+                    </th>
+                    <th>
+                        DETALLE
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <div class="form-group">
+        @*<label asp-for="ArrayFiles"></label>*@
+        <input class="form-control" id="arrayCHK"  readonly />
+        <input class="form-control" id="inpObs"/>
+    </div>
+
+    <br />
+    <br />
+    <br />
+</form>
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.3/css/jquery.dataTables.css">
 <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.js"></script>
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    <script>
+<script>
         var table;
         $(document).ready(function () {
             $("#spinner").hide();
             showAlert();
             showTable(0);
-            $('#slctEstatus').on('change', function () {
+            $('#slctPartition').on('change', function () {
                 //console.log("OnChange");
                 var estatus = this.value;
                 if (estatus == 0) {
-                    $('#div_table').hide();
-                    $('#div_firma').hide();
+                    table.clear()
+                        .draw();
                     // $("#btnAddProcedure").attr('href', '#');
                 } else {
-                    $('#div_table').show();
-                    $('#div_firma').show();
                     showTable(estatus);
                 }
 
-        });
+            });
+            $("#btnFil").click(function () {
+                let ids = $("#arrayCHK").val();
+                let obs = $("#inpObs").val();
+                console.log(ids, "-", obs )
+                let obj = {
+                    ids: ids,
+                    obs: obs,
+                };
+                
+            $.ajax({
+            type: "post",
+            url: "@Url.Action("BajaArchivos", "Baja")", // Url
+                data: { ids: ids, obs: obs },
+                dataType: "text",
+                success: function (data) {
+                    console.log(data);
+                $('#spinner').hide();
+                $("#alert").html(data.message).fadeIn("slow");
+                showAlert();
+            }
+        })
+            });
             //Filtro por columna DataTable JQuery
             $('#table thead tr').clone(true).appendTo('#table thead').find('th:eq(0)').text('');
             $('#table thead tr:eq(1) th').not(':eq(0),:eq(5)').each(function (i) {
@@ -142,7 +172,7 @@
                 "proccessing": true,
                 "serverSide": false,
                 "ajax": {
-                    url: "/Lista/ListaAjax" + '/' + estatus,
+                    url: "/Lista/ListDetailAjax" + '/' + estatus,
                     type: 'GET',
                     headers: { 'RequestVerificationToken': $('@Html.AntiForgeryToken()').val() },
                     complete: function () {
@@ -199,13 +229,13 @@
                 "targets": 1,
                 'data': 'id',
                 'render': function (data, type, row) {
-                    if (type === 'display') {
-                        if (row.status == 'Cargado' || row.status == 'Parcial') {
+                    //if (type === 'display') {
+                        //if (row.status == 'Cargado' || row.status == 'Parcial') {
                             data = '<input type="checkbox" id="' + data + '" class="sub_chk" value="' + data + '">';
-                        } else {
+                        /*} else {
                             data = '';
-                        }
-                    }
+                        }*/
+                    //}
                     return data;
                 }
             },
@@ -236,19 +266,17 @@
         function showAlert() {
 
             setTimeout(function () {
-                $("#alerta").fadeOut(2000);
+                $("#alerta").fadeOut(1500);
 
-            }, 4000);
+            }, 3000);
 
 
             setTimeout(function () {
 
                 $("#alerta").remove();
-            }, 8000);
+            }, 6000);
 
         }
 
-    </script>
+</script>
 }
-
-

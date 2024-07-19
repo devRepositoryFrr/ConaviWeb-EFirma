@@ -85,20 +85,22 @@ namespace ConaviWeb.Data.Repositories
             return result > 0;
         }
 
-        public async Task<bool> InsertPartition(string partition, User user)
+        public async Task<bool> InsertPartition(string partition, User user, string json, int firmas)
         {
             var db = DbConnection();
             DateTime dateTime = DateTime.Now;
             partition = partition + "_" + dateTime.ToString("ddMMyyyy_HHmmss");
             var sql = @"
-                        INSERT INTO c_particion (descripcion, id_usuario, id_sistema) VALUES (
-                        @Partition, @IdUser, @IdSystem)";
+                        INSERT INTO c_particion (descripcion, id_usuario, id_sistema, json_proceso, nu_firmas) VALUES (
+                        @Partition, @IdUser, @IdSystem, @Json, @Firmas)";
 
             var result = await db.ExecuteAsync(sql, new
             {
                 Partition = partition,
                 IdUser = user.Id,
-                IdSystem = user.IdSystem
+                IdSystem = user.IdSystem,
+                Json = json,
+                Firmas = firmas
             });
             return result > 0;
         }

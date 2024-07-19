@@ -165,6 +165,22 @@ namespace ConaviWeb.Services
                             respuesta = ocspCli.Query(certificadocliente, emisor, certificadoconfianza);
                             linea++;
                             break;
+                        case "AC6":
+                            certificadoconfianza = OBC_Utilities.LoadCertificate(Properties.Resources.OCSP_AC6_SAT);
+                            linea++;
+                            emisor = OBC_Utilities.LoadCertificate(Properties.Resources.AC6_SAT);
+                            linea++;
+                            respuesta = ocspCli.Query(certificadocliente, emisor, certificadoconfianza);
+                            linea++;
+                            break;
+                        case "AC7":
+                            certificadoconfianza = OBC_Utilities.LoadCertificate(Properties.Resources.OCSP_AC7_SAT);
+                            linea++;
+                            emisor = OBC_Utilities.LoadCertificate(Properties.Resources.AC7);
+                            linea++;
+                            respuesta = ocspCli.Query(certificadocliente, emisor, certificadoconfianza);
+                            linea++;
+                            break;
                         default:
                             certificadoconfianza = OBC_Utilities.LoadCertificate(Properties.Resources.ocsp_ac4_sat);
                             linea++;

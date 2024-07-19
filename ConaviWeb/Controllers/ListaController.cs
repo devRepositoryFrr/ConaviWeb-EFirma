@@ -43,7 +43,7 @@ namespace ConaviWeb.Controllers
 
             //if (user.Rol.ToString() == "FirmanteInterno")
             //{
-                files = await _processSignRepository.GetFiles(user.IdSystem, IdEstatus, Convert.ToInt32(user.Rol), user.RFC);
+                files = await _processSignRepository.GetFiles(user.Id,user.IdSystem, IdEstatus, Convert.ToInt32(user.Rol), user.RFC);
 
 
             //}

@@ -136,6 +136,12 @@
   <data name="AC5_SAT" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\AC5_SAT.cer;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="AC6_SAT" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\AC6_SAT.crt;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="AC7" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\AC7.crt;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="ARC0_IES" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\ARC0_IES.cer;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -174,5 +180,11 @@
   </data>
   <data name="ocsp_ac5_sat" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\ocsp.ac5_sat.cer;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="OCSP_AC6_SAT" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\OCSP.AC6_SAT.cer;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="OCSP_AC7_SAT" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\OCSP.AC7_SAT.cer;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

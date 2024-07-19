@@ -14,15 +14,18 @@
 
   <ItemGroup>
     <PackageReference Include="itext7" Version="7.2.0" />
+    <PackageReference Include="MailKit" Version="3.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.11" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="5.0.10" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="5.0.2" />
+    <PackageReference Include="MimeKit" Version="3.4.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-    <PackageReference Include="QRCoder" Version="1.4.1" />
+    <PackageReference Include="QRCoder" Version="1.4.3" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="wwwroot\css\cssConavi\" />
+    <Folder Include="wwwroot\doc\EFirma\Firmado\ACTA01EXT22_27072022_145534\" />
     <Folder Include="wwwroot\img\" />
   </ItemGroup>
 

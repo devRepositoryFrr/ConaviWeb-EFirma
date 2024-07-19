@@ -70,9 +70,33 @@ namespace ConaviWeb.Data.Repositories
             var sql = @"
                         SELECT id Id, descripcion Text
                         FROM c_particion
-                        where id_sistema = @IdSystem";
+                        where id_sistema = @IdSystem
+                        and estatus = 1";
 
             return await db.QueryAsync<Partition>(sql, new { IdSystem = idSystem });
+        }
+
+        public async Task<IEnumerable<Partition>> GetPartitionsBaja(int idSystem)
+        {
+            var db = DbConnection();
+
+            var sql = @"
+                        SELECT id Id, descripcion Text
+                        FROM c_particion
+                        where id_sistema = @IdSystem
+                        ";
+
+            return await db.QueryAsync<Partition>(sql, new { IdSystem = idSystem });
+        }
+
+        public async Task<IEnumerable<Partition>> GetPartitionsD(int idSystem, int idUser)
+        {
+            var db = DbConnection();
+
+            var sql = @"
+                        CALL sp_get_particion_descarga(@IdSystem, @IdUser);";
+
+            return await db.QueryAsync<Partition>(sql, new { IdSystem = idSystem, IdUser = idUser});
         }
 
         public async Task<Partition> GetPartition(int idPartition)
@@ -80,11 +104,46 @@ namespace ConaviWeb.Data.Repositories
             var db = DbConnection();
 
             var sql = @"
-                        SELECT id Id, descripcion Text, ruta_particion as PathPartition
+                        SELECT id Id, descripcion Text, ruta_particion as PathPartition, json_proceso JsonUsers, nu_firmas Firmas
                         FROM c_particion
-                        where id = @IdPartition";
+                        where id = @IdPartition
+                        and estatus = 1";
 
             return await db.QueryFirstOrDefaultAsync<Partition>(sql, new { IdPartition = idPartition });
+        }
+        public async Task<IEnumerable<User>> GetUsers(int idSystem)
+        {
+            var db = DbConnection();
+
+            var sql = @"
+                        SELECT id Id, concat(concat_ws(' ', ifnull(nombre,''), ifnull(primer_apellido,''), ifnull(segundo_apellido,'')),' - ',t_cargo_comite) Name FROM prod_web_efirma.usuario
+                        where id_sistema = @IdSystem and firmante = 1";
+
+            return await db.QueryAsync<User>(sql, new { IdSystem = idSystem });
+        }
+        public async Task<Sistema> GetSystem(int idSystem)
+        {
+            var db = DbConnection();
+
+            var sql = @"
+                        SELECT 
+                        id Id, descripcion Descripcion, numero_firmas NumeroFirmas, activo Activo
+                        FROM
+                        prod_web_efirma.c_sistema
+                        WHERE
+                        id =@IdSystem";
+
+            return await db.QueryFirstOrDefaultAsync<Sistema>(sql, new { IdSystem = idSystem });
+        }
+
+        public async Task<IEnumerable<Firmados>> GetFirmados(int idParticion)
+        {
+            var db = DbConnection();
+
+            var sql = @"
+                        call prod_web_efirma.sp_get_cantidad_firmados(@IdParticion);";
+
+            return await db.QueryAsync<Firmados>(sql, new { IdParticion = idParticion });
         }
     }
 }

@@ -14,7 +14,7 @@ namespace ConaviWeb.Data.Repositories
         Task<bool> InsertSourceFile(SourceFile sourceFile);
         Task<bool> UpdateSourceFile(SourceFile sourceFile);
         Task<bool> DeleteSourceFile(SourceFile sourceFile);
-        Task<bool> InsertPartition(string partition, User user);
+        Task<bool> InsertPartition(string partition, User user, string json, int firmas);
         Task<bool> UpdateParition(Partition partition);
     }
 }
