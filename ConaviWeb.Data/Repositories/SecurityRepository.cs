@@ -116,7 +116,7 @@ namespace ConaviWeb.Data.Repositories
             var db = DbConnection();
 
             var sql = @"
-                        SELECT id Id, concat(concat_ws(' ', ifnull(nombre,''), ifnull(primer_apellido,''), ifnull(segundo_apellido,'')),' - ',t_cargo_comite) Name FROM prod_web_efirma.usuario
+                        SELECT id Id, concat(concat_ws(' ', ifnull(nombre,''), ifnull(primer_apellido,''), ifnull(segundo_apellido,'')),' - ',t_cargo_comite,' - ',cargo) Name FROM prod_web_efirma.usuario
                         where id_sistema = @IdSystem and firmante = 1";
 
             return await db.QueryAsync<User>(sql, new { IdSystem = idSystem });

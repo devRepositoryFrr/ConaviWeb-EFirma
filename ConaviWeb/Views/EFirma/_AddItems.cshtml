@@ -36,20 +36,24 @@
             </div>
             @if (ViewBag.Sistema == 5)
             {
-                    <div class="row col-md-12">
-                        <label style="font-size:18px">Usuario</label>
-                        <select id="slctUser" class="form-control" asp-items="@(new SelectList((System.Collections.IEnumerable)ViewData["Users"], "Id", "Name"))">
-                            <option value="0">--Select--</option>
-                        </select>
-                    </div>
-                    <div class="row col-md-12">
-                        <label style="font-size:18px">Función dentro del Comité</label>
-                        <input type="text" id="funcText" class="form-control"/>
-                    </div>
-                    <div class="row col-md-6" style="margin-top: 25px;">
-                        <button type="button" id="btnAdd" class="btn btn-danger"><i class="fa fa-plus"></i></button>
-                        <button type="button" id="btnRemove" class="btn btn-primary"><i class="fa fa-minus"></i></button>
-                    </div>
+                <div class="row col-md-12">
+                    <label style="font-size:18px">Usuario</label>
+                    <select id="slctUser" class="form-control" asp-items="@(new SelectList((System.Collections.IEnumerable)ViewData["Users"], "Id", "Name"))">
+                        <option value="0">--Select--</option>
+                    </select>
+                </div>
+                <div class="row col-md-12">
+                    <label style="font-size:18px">Función dentro del Comité</label>
+                    <input type="text" id="funcText" class="form-control" />
+                </div>
+                <div class="row col-md-12">
+                    <label style="font-size:18px">Nombramiento</label>
+                    <input type="text" id="nombramiento" class="form-control" />
+                </div>
+                <div class="row col-md-6" style="margin-top: 25px;">
+                    <button type="button" id="btnAdd" class="btn btn-danger"><i class="fa fa-plus"></i></button>
+                    <button type="button" id="btnRemove" class="btn btn-primary"><i class="fa fa-minus"></i></button>
+                </div>
                 <div class="row col-md-12">
                     <span asp-validation-for="JsonUsers" class="text-danger"></span>
                     <div class="addTask">
@@ -58,6 +62,7 @@
                                 <tr>
                                     <th>Usuario</th>
                                     <th style="text-align:center">Posición firma</th>
+                                    <th style="text-align:center">Nombramiento</th>
                                     <th style="text-align:center">Función</th>
                                 </tr>
                             </thead>
@@ -65,8 +70,8 @@
                         </table>
                     </div>
                 </div>
-                <input asp-for="JsonUsers" style="visibility:hidden"/>
-                <input asp-for="Firmas" style="visibility:hidden"/>
+                <input asp-for="JsonUsers" style="visibility:hidden" />
+                <input asp-for="Firmas" style="visibility:hidden" />
             }
         </div>
         <div class="modal-footer">
@@ -87,21 +92,25 @@
         $('#btnAdd').click(function () {
             //i++;
             var idUser = $('#slctUser').val();
-            var name = $('#slctUser option:selected').text();
+            var arrName=$('#slctUser option:selected').text().split("-");
+            var name = arrName[0];
             var cargo = $('#funcText').val();
+            var puesto = $('#nombramiento').val();
             
             if (idUser > 0 && cargo !='') {
                 i++;
                 json.push({
                     id_usuario: idUser,
                     posicion: i,
-                    cargo: cargo
+                    cargo: cargo,
+                    puesto: puesto
                 });
                 var fixingContent =
-                    '<tr><td>' + name + '</td>' + '<td style="text-align:center">' + i + '</td>' + '<td style="text-align:center">'+ cargo +'</td></tr>';
+                    '<tr><td>' + name + '</td>' + '<td style="text-align:center">' + i + '</td>' + '<td style="text-align:center">' + puesto +'</td>' + '<td style="text-align:center">'+ cargo +'</td></tr>';
                 $('.tableUsers').append(fixingContent);
                 $('#slctUser').val(0);
                 $('#funcText').val('');
+                $('#nombramiento').val('');
                 
                 jsonString = JSON.stringify(json);
                 $('#JsonUsers').val(jsonString);
@@ -114,6 +123,7 @@
             jsonString = '';
             $('#slctUser').val(0);
             $('#funcText').val('');
+            $('#nombramiento').val('');
             $(".tableUsers > tbody").html('');
             $('#JsonUsers').val('');
             $('#Firmas').val('');
@@ -124,6 +134,7 @@
             jsonString = '';
             $('#slctUser').val(0);
             $('#funcText').val('');
+            $('#nombramiento').val('');
             $(".tableUsers > tbody").html('');
             $('#JsonUsers').val('');
             $('#Firmas').val('');
@@ -132,8 +143,9 @@
         })
         $("#slctUser").on("change", function () {
             let option = $("#slctUser option:selected").text();
-            let funct = option.split("-").pop()
-            $('#funcText').val($.trim(funct));
+            let funct = option.split("-");
+            $('#funcText').val($.trim(funct[1]));
+            $('#nombramiento').val($.trim(funct[2]));
         });
     })
 </script>

@@ -162,10 +162,12 @@ namespace ConaviWeb.Services
                             int id = (int)result["id_usuario"];
                             int posicion = (int)result["posicion"];
                             string funcionC = (string)result["cargo"];
+                            string funcionP = (string)result["puesto"];
                             if (user.Id == id)
                             {
                                 user.PFirma = posicion;
                                 user.Cargo = funcionC;
+                                user.Position = funcionP;
                                 break;
                             }
                         }
