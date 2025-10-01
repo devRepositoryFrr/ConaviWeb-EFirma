@@ -44,6 +44,7 @@ namespace ConaviWeb.Controllers
             List<Module> modules = new();
             if (userResponse != null)
             {
+                userResponse.IdSistema = userRequest.Modulo;
                 userResponse.AccessToken = await _securityTools.GetToken(userResponse);
                 userResponse.Modules = await _securityRepository.GetModules(Convert.ToInt32(userResponse.Rol));
                 if (userResponse.AccessToken != null)

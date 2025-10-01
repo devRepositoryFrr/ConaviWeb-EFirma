@@ -111,12 +111,36 @@ namespace ConaviWeb
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Home/Error500");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
+            // Status code handling
+            app.UseStatusCodePages(async context =>
+            {
+                var response = context.HttpContext.Response;
+                var pathBase = context.HttpContext.Request.PathBase.HasValue
+                    ? context.HttpContext.Request.PathBase.Value
+                    : "";
+
+                if (response.StatusCode == 401 || response.StatusCode == 403)
+                {
+                    response.Redirect($"{pathBase}/");
+                }
+                else if (response.StatusCode == 404)
+                {
+                    response.Redirect($"{pathBase}/Home/Error404");
+                }
+                await System.Threading.Tasks.Task.CompletedTask;
+            });
+
+            app.UseHttpsRedirection();
+            //Se requiere para acceder a los archivoscargados
+            app.UseStaticFiles();
+            app.UseRouting();
             app.UseSession();
+
             app.Use(async (context, next) =>
             {
                 var token = context.Session.GetString("Token");
@@ -126,12 +150,6 @@ namespace ConaviWeb
                 }
                 await next();
             });
-
-            app.UseHttpsRedirection();
-            //Se requiere para acceder a los archivoscargados
-            app.UseStaticFiles();
-
-            app.UseRouting();
 
             app.UseAuthentication();
             app.UseAuthorization();

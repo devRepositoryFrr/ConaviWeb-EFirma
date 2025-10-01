@@ -1,11 +1,10 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿
+@{
+    ViewData["Title"] = "Inicio";
 }
-<br />
-<br />
-<br />
-<p>Usuario:&nbsp;@User.Identity.Name</p>
-@*<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>*@
+<h2>
+    Usuario:&nbsp;@User.Identity.Name
+</h2>
+<a class="btn btn-primary" href="@Url.Action("DescargarManual", "Home")">
+    Descargar Manual de Usuario
+</a>

@@ -15,7 +15,7 @@
                     @Html.Raw(@ViewBag.Alert)
                 </div>
                 <div class="col-md-4">
-                    <button id='open' class="btn btn-primary pull-right" type="button" data-toggle="modal" data-target="#showmodal"><span class="fa fa-plus"></span>&ensp;Agregar partición</button>
+                    <button id='open' class="btn btn-primary pull-right" type="button" data-bs-toggle="modal" data-bs-target="#showmodal"><span class="fa fa-plus"></span>&ensp;Agregar partición</button>
                 </div>
             </div>
             <div class="row col-md-4">
@@ -48,7 +48,7 @@
 </div>
 
 <!-- Modal -->
-<div class="modal fade fade-" style="z-index:1041" id="showmodal" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+<div class="modal" id="showmodal" tabindex="1">
     <div class="modal-dialog">
         <div class="modal-content">
             @{

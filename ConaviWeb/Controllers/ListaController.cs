@@ -1,4 +1,5 @@
-﻿using ConaviWeb.Data.Repositories;
+﻿using ConaviWeb.Commons;
+using ConaviWeb.Data.Repositories;
 using ConaviWeb.Model;
 using ConaviWeb.Model.Response;
 using Microsoft.AspNetCore.Authorization;
@@ -27,8 +28,8 @@ namespace ConaviWeb.Controllers
         [Route("List")]
         public async Task<IActionResult> IndexAsync()
         {
-            User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
-            TempData["Sistema"] = user.IdSystem;
+            var user = HttpContext.Session.GetObject<UserResponse>("ComplexObject");
+            TempData["Sistema"] = user.IdSistema;
             if (TempData.ContainsKey("Alert"))
                 ViewBag.Alert = TempData["Alert"].ToString();
             return View("../EFirma/Lista");
@@ -38,12 +39,13 @@ namespace ConaviWeb.Controllers
         public async Task<IActionResult> ListAllFiles(int IdEstatus)
         {
             Response response = new Response();
+            var Suser = HttpContext.Session.GetObject<UserResponse>("ComplexObject");
             User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
             IEnumerable<FileResponse> files;
 
             //if (user.Rol.ToString() == "FirmanteInterno")
             //{
-                files = await _processSignRepository.GetFiles(user.Id,user.IdSystem, IdEstatus, Convert.ToInt32(user.Rol), user.RFC);
+                files = await _processSignRepository.GetFiles(user.Id,Suser.IdSistema, IdEstatus, Convert.ToInt32(user.Rol), user.RFC);
 
 
             //}

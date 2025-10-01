@@ -1,4 +1,5 @@
-﻿using ConaviWeb.Data.Repositories;
+﻿using ConaviWeb.Commons;
+using ConaviWeb.Data.Repositories;
 using ConaviWeb.Model;
 using ConaviWeb.Model.Response;
 using Microsoft.AspNetCore.Mvc;
@@ -21,8 +22,9 @@ namespace ConaviWeb.Controllers
         }
         public async Task<IActionResult> IndexAsync()
         {
-            User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
-            IEnumerable<Partition> partitions = await _securityRepository.GetPartitionsD(user.IdSystem, user.Id);
+            var user = HttpContext.Session.GetObject<UserResponse>("ComplexObject");
+            //User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+            IEnumerable<Partition> partitions = await _securityRepository.GetPartitionsD(user.IdSistema, user.Id);
             ViewData["Partitions"] = partitions;
             return View("../EFirma/Firmados");
         }

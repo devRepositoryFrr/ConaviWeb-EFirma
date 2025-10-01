@@ -28,14 +28,23 @@
                         <input class="form-control" asp-for="SUser" />
                         <span asp-validation-for="SUser" class="text-danger"></span>
                     </div>
-                    <br />
                     <div class="form-group">
                         <label asp-for="Password"></label>
                         <input class="form-control" asp-for="Password" />
                         <span asp-validation-for="Password" class="text-danger"></span>
                     </div>
-                    <br />
-
+                    <div class="form-group">
+                        <label asp-for="Modulo"></label>
+                        <select class="form-control" id="modulo" name="modulo">
+                            <option value="0">--- Seleccione ---</option>
+                            <option value="1"> Contratos </option>
+                            <option value="2"> Convenios </option>
+                            <option value="4"> RH </option>
+                            <option value="5"> Actas CF </option>
+                            <option value="6"> Actas CS </option>
+                        </select>
+                        <span asp-validation-for="Modulo" class="text-danger"></span>
+                    </div>
                     <button class="btn btn-primary pull-right" type="submit"><span class="fa fa-sign-in"></span>&ensp;Iniciar Sesión</button>
                 </form>
                 @*}

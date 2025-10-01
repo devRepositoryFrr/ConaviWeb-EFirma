@@ -1,0 +1,16 @@
+﻿@model IEnumerable<ConaviWeb.Model.Module>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark navbar-cnvi">
+    <div class="container">
+        <div class="navbar-nav">
+            @foreach (var module in Model)
+            {
+                <a class="nav-link px-3" href="@module.Url">@module.Text</a>
+            }
+        </div>
+        <div class="navbar-nav ms-auto align-items-center">
+            <span class="nav-item text-white me-3">Bienvenido, @User.Identity.Name</span>
+            <a class="nav-link text-white" href="@Url.Action("Logout", "Login")">Cerrar sesión</a>
+        </div>
+    </div>
+</nav>

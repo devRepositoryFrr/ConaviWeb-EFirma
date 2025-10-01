@@ -34,7 +34,7 @@
                 <input id="partitionText" class="form-control" asp-for="Text" autocomplete="off" />
                 <span asp-validation-for="Text" class="text-danger"></span>
             </div>
-            @if (ViewBag.Sistema == 5)
+            @if (ViewBag.Sistema == 5 || ViewBag.Sistema == 6)
             {
                 <div class="row col-md-12">
                     <label style="font-size:18px">Usuario</label>
@@ -75,7 +75,7 @@
             }
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal" id="btnCan">Cancelar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnCan">Cancelar</button>
             <button type="submit" class="btn btn-primary">Guardar</button>
         </div>
 </form>

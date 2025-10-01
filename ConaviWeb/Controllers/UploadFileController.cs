@@ -42,14 +42,15 @@ namespace ConaviWeb.Controllers
 
         public async Task<IActionResult> Index()
         {
-            User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
-            IEnumerable<Partition> partitions = await _securityRepository.GetPartitions(user.IdSystem);
-            IEnumerable<User> users = await _securityRepository.GetUsers(user.IdSystem);
+            //User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+            var user = HttpContext.Session.GetObject<UserResponse>("ComplexObject");
+            IEnumerable<Partition> partitions = await _securityRepository.GetPartitions(user.IdSistema);
+            IEnumerable<User> users = await _securityRepository.GetUsers(user.IdSistema);
             
             ViewData["Partitions"] = partitions;
             ViewData["Users"] = users;
             ViewBag.Alert = TempData["Alert"];
-            ViewBag.Sistema = user.IdSystem;
+            ViewBag.Sistema = user.IdSistema;
             return View("../EFirma/UploadFile");
         }
 
@@ -72,7 +73,7 @@ namespace ConaviWeb.Controllers
             var sessionData = HttpContext.Session.GetObject<UserResponse>("ComplexObject");
             //Logica Recursos Humanos
             string shortPath = "";
-            if (sessionData.IdSistema == 4 || sessionData.IdSistema == 5)
+            if (sessionData.IdSistema == 4 || sessionData.IdSistema == 5 || sessionData.IdSistema == 6)
             {
                 shortPath = Path.Combine("doc", "EFirma", "Original", partition.Text);
             }
@@ -109,7 +110,7 @@ namespace ConaviWeb.Controllers
             respuesta.Success = 1;
             respuesta.Message = "Se cargaron " + count + " archivos.";
                 
-                if (sessionData.IdSistema == 5)
+                if (sessionData.IdSistema == 5 || sessionData.IdSistema == 6)
                 {
                     var dataMail = await _processSignRepository.GetMailCarga(partition.Id);
                     var mail = new System.Text.StringBuilder();

@@ -16,5 +16,8 @@ namespace ConaviWeb.Model.Request
         [Display(Name = "Contraseña")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
+        [Required(ErrorMessage = "El campo {0} es requerido")]
+        [Display(Name = "Modulo")]
+        public int Modulo { get; set; }
     }
 }

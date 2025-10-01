@@ -1,5 +1,7 @@
-﻿using ConaviWeb.Data.Repositories;
+﻿using ConaviWeb.Commons;
+using ConaviWeb.Data.Repositories;
 using ConaviWeb.Model;
+using ConaviWeb.Model.Response;
 using ConaviWeb.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -24,13 +26,14 @@ namespace ConaviWeb.Controllers
         }
         public async Task<IActionResult> Index()
         {
-            User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
-            IEnumerable<Partition> partitions = await _securityRepository.GetPartitionsBaja(user.IdSystem);
+            var user = HttpContext.Session.GetObject<UserResponse>("ComplexObject");
+            //User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+            IEnumerable<Partition> partitions = await _securityRepository.GetPartitionsBaja(user.IdSistema);
             
 
             ViewData["Partitions"] = partitions;
             ViewBag.Alert = TempData["Alert"];
-            ViewBag.Sistema = user.IdSystem;
+            ViewBag.Sistema = user.IdSistema;
             return View("../EFirma/BajaFirmados");
         }
         [HttpPost]

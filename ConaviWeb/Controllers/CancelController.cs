@@ -1,4 +1,5 @@
-﻿using ConaviWeb.Data.Repositories;
+﻿using ConaviWeb.Commons;
+using ConaviWeb.Data.Repositories;
 using ConaviWeb.Model;
 using ConaviWeb.Model.Request;
 using ConaviWeb.Model.Response;
@@ -46,11 +47,12 @@ namespace ConaviWeb.Controllers
         public async Task<IActionResult> CancelFiles([FromForm] DataSignRequest dataSignRequest)
         {
             User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+            var Suser = HttpContext.Session.GetObject<UserResponse>("ComplexObject");
             IEnumerable<FileResponse> files;
             bool success = false;
             //if (user.Rol.ToString() == "FirmanteInterno")
             //{
-            files = await _processSignRepository.GetFilesForCancel(user.IdSystem, dataSignRequest.ArrayFiles);
+            files = await _processSignRepository.GetFilesForCancel(Suser.IdSistema, dataSignRequest.ArrayFiles);
             //}
             //else
             //{

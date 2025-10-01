@@ -1,5 +1,7 @@
-﻿using ConaviWeb.Data.Repositories;
+﻿using ConaviWeb.Commons;
+using ConaviWeb.Data.Repositories;
 using ConaviWeb.Model;
+using ConaviWeb.Model.Response;
 using ConaviWeb.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -29,7 +31,9 @@ namespace ConaviWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> AddItem([FromForm] Partition partition)
         {
+            var Suser = HttpContext.Session.GetObject<UserResponse>("ComplexObject");
             User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+            user.IdSystem = Suser.IdSistema;
             bool success = await _sourceFileRepository.InsertPartition(partition.Text, user, partition.JsonUsers, partition.Firmas);
             if (!success)
             {

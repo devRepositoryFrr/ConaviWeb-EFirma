@@ -1,4 +1,5 @@
-﻿using ConaviWeb.Data.Repositories;
+﻿using ConaviWeb.Commons;
+using ConaviWeb.Data.Repositories;
 using ConaviWeb.Model;
 using ConaviWeb.Model.Response;
 using Microsoft.AspNetCore.Authorization;
@@ -28,8 +29,9 @@ namespace ConaviWeb.Controllers
         [Route("List")]
         public async Task<IActionResult> Index()
         {
-            User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
-            IEnumerable<Partition> partitions = await _securityRepository.GetPartitions(user.IdSystem);
+            var user = HttpContext.Session.GetObject<UserResponse>("ComplexObject");
+            //User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+            IEnumerable<Partition> partitions = await _securityRepository.GetPartitions(user.IdSistema);
 
             ViewData["Partitions"] = partitions;
             if (TempData.ContainsKey("Alert"))
@@ -41,14 +43,15 @@ namespace ConaviWeb.Controllers
         public async Task<IActionResult> ListAllSigned(int idPartition)
         {
             Response response = new Response();
-            User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+            //User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+            var user = HttpContext.Session.GetObject<UserResponse>("ComplexObject");
             IEnumerable<FileResponse> files;
 
             //if (user.Rol.ToString() == "FirmanteInterno")
             //{
             if (idPartition == 0)
             {
-                files = await _processSignRepository.GetSignedFilesCancel(user.IdSystem);
+                files = await _processSignRepository.GetSignedFilesCancel(user.IdSistema);
             }
             else
             {

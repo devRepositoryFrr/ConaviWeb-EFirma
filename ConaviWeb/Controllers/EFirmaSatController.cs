@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using ConaviWeb.Commons;
 using ConaviWeb.Data.Repositories;
 using ConaviWeb.Model;
 using ConaviWeb.Model.Request;
@@ -46,12 +47,14 @@ namespace ConaviWeb.Controllers
         public async Task<IActionResult> SignFiles([FromForm] DataSignRequest dataSignRequest)
         {
             User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+            var Suser = HttpContext.Session.GetObject<UserResponse>("ComplexObject");
+            user.IdSystem = Suser.IdSistema;
             IEnumerable<FileResponse> files;
             bool success = false;
             Response respuesta = new();
             //if (user.Rol.ToString() == "FirmanteInterno")
             //{
-                files = await _processSignRepository.GetFilesForSign(user.IdSystem, dataSignRequest.ArrayFiles, dataSignRequest.Estatus);
+                files = await _processSignRepository.GetFilesForSign(Suser.IdSistema, dataSignRequest.ArrayFiles, dataSignRequest.Estatus);
             //}
             //else
             //{

@@ -3,14 +3,14 @@
     ViewBag.Title = "Firma";
 }
 
-<form id="formSign" class="submit-once" enctype="multipart/form-data" method="post" asp-route="Register">
+<form id="formSign" class="submit-once" enctype="multipart/form-data" method="post" asp-route="Register" onsubmit="disableSubmitButton(event)">
     <div class="form-row">
         <div class="form-group col-md-12">
                 @Html.Raw(@ViewBag.Alert)
         </div>
     </div>
     @{
-        if (@TempData["Sistema"].ToString() == "4" || @TempData["Sistema"].ToString() == "5")
+        if (@TempData["Sistema"].ToString() == "4" || @TempData["Sistema"].ToString() == "5" || @TempData["Sistema"].ToString() == "6")
         {
         <div class="form-group row">
             <div class="col-md-6">
@@ -132,7 +132,7 @@
         });
 
         $(window).on('beforeunload', function () {
-            console.log("before");
+            console.log("firma");
             $('.spinner').css('display', 'block');
         });
 
@@ -246,6 +246,14 @@
                 $("#alerta").remove();
             }, 8000);
 
+        }
+        function disableSubmitButton(event) {
+            const submitButton = document.getElementById('btnFirma');
+            if (submitButton) {
+                submitButton.disabled = true;
+            }
+            // Allow the form to submit
+            return true;
         }
 
     </script>

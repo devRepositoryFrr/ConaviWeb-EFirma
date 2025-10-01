@@ -1,4 +1,5 @@
-﻿using ConaviWeb.Data.Repositories;
+﻿using ConaviWeb.Commons;
+using ConaviWeb.Data.Repositories;
 using ConaviWeb.Model;
 using ConaviWeb.Model.Request;
 using ConaviWeb.Model.Response;
@@ -37,8 +38,9 @@ namespace ConaviWeb.Controllers
         [Route("List")]
         public async Task<IActionResult> Index()
         {
-            User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
-            IEnumerable<Partition> partitions = await _securityRepository.GetPartitionsD(user.IdSystem,user.Id);
+            //User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+            var user = HttpContext.Session.GetObject<UserResponse>("ComplexObject");
+            IEnumerable<Partition> partitions = await _securityRepository.GetPartitionsD(user.IdSistema,user.Id);
 
             ViewData["Partitions"] = partitions;
             return View("../EFirma/ListFirmados");
@@ -48,7 +50,8 @@ namespace ConaviWeb.Controllers
         public async Task<IActionResult> ListAllSigned(int idPartition)
         {
             Response response = new Response();
-            User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+            //User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+            var user = HttpContext.Session.GetObject<UserResponse>("ComplexObject");
             IEnumerable<FileResponse> files;
 
             //if (user.Rol.ToString() == "FirmanteInterno")
@@ -59,7 +62,7 @@ namespace ConaviWeb.Controllers
                 //}
                 //else
                 //{
-                    files = await _processSignRepository.GetFilesFirmados(idPartition,3,user.IdSystem);
+                    files = await _processSignRepository.GetFilesFirmados(idPartition,3,user.IdSistema);
                 //}
                 
 
@@ -84,8 +87,9 @@ namespace ConaviWeb.Controllers
         public async Task DownloadZipFile(int id)
         {
             Partition partition = await _securityRepository.GetPartition(id);
-            User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
-            Sistema sistema = await _securityRepository.GetSystem(user.IdSystem);
+            //User user = await _userRepository.GetUserDetails(Int32.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)));
+            var user = HttpContext.Session.GetObject<UserResponse>("ComplexObject");
+            Sistema sistema = await _securityRepository.GetSystem(user.IdSistema);
             if (sistema.NumeroFirmas == 1)
             {
                 Response.ContentType = "application/octet-stream";
@@ -117,7 +121,7 @@ namespace ConaviWeb.Controllers
                 string[] botFilePaths = { };
                 var folderPath = Path.Combine(_environment.WebRootPath, file.FilePath);
                 var filePath = Path.Combine(folderPath, file.FileName);
-                if (sistema.Id == 5)
+                if (sistema.Id == 5 || sistema.Id == 6)
                 {
                     var dirPath = Path.Combine(folderPath, "anexos");
                     botFilePaths = Directory.GetFiles(dirPath);

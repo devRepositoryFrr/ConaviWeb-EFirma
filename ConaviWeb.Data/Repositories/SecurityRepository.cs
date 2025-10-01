@@ -29,10 +29,10 @@ namespace ConaviWeb.Data.Repositories
             var db = DbConnection();
 
             var sql = @"
-                        SELECT id AS Id, concat(nombre,' ',primer_apellido,' ',segundo_apellido) Name, usuario AS SUser, id_rol AS Rol, id_sistema AS IdSistema
-                        FROM usuario WHERE usuario = @SUser AND password = @Password AND activo = 1";
+                        SELECT id AS Id, concat(nombre,' ',primer_apellido,' ',segundo_apellido) Name, usuario AS SUser, id_rol AS Rol
+                        FROM usuario WHERE usuario = @SUser AND password = @Password AND activo = 1 AND FIND_IN_SET(@Modulo,id_sistema)";
 
-            return await db.QueryFirstOrDefaultAsync<UserResponse>(sql, new { login.SUser, login.Password });
+            return await db.QueryFirstOrDefaultAsync<UserResponse>(sql, new { login.SUser, login.Password , login.Modulo});
             }
             catch (System.Exception e)
             {
@@ -117,7 +117,7 @@ namespace ConaviWeb.Data.Repositories
 
             var sql = @"select Id, Name from (
                         SELECT id Id, concat(concat_ws(' ', ifnull(nombre,''), ifnull(primer_apellido,''), ifnull(segundo_apellido,'')),' - ',t_cargo_comite,' - ',cargo) Name FROM prod_web_efirma.usuario
-                        where id_sistema = @IdSystem and firmante = 1) as T where T.Name is not NULL;";
+                        where FIND_IN_SET(@IdSystem,id_sistema) and firmante = 1) as T where T.Name is not NULL;";
 
             return await db.QueryAsync<User>(sql, new { IdSystem = idSystem });
         }

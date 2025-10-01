@@ -21,7 +21,7 @@
     </script>
 
     <link rel="shortcut icon" href="https://framework-gb.cdn.gob.mx/favicon.ico">
-    <link href="https://framework-gb.cdn.gob.mx/assets/styles/main.css" rel="stylesheet">
+    <link href="https://framework-gb.cdn.gob.mx/gm/v3/assets/styles/main.css" rel="stylesheet">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
@@ -57,11 +57,11 @@
         }
     </script>
     @*SNIIV*@
-    <link href="~/css/style1.css" rel="stylesheet" type="text/css" />
+    @* <link href="~/css/style1.css" rel="stylesheet" type="text/css" /> *@
     @*NavBarConavi*@
-    <link href="~/css/cssConavi/navbar.css" rel="stylesheet" type="text/css" />
+    @* <link href="~/css/cssConavi/navbar.css" rel="stylesheet" type="text/css" /> *@
     @*ContentConavi*@
-    <link href="~/css/cssConavi/content.css" rel="stylesheet" type="text/css" />
+    @* <link href="~/css/cssConavi/content.css" rel="stylesheet" type="text/css" /> *@
     @*AlertConavi*@
     <link href="~/css/cssConavi/alert.css" rel="stylesheet" type="text/css" />
     @*ModalConavi*@
@@ -113,26 +113,26 @@
             </div>
         </div>
     </div>
-    <div class="container">
-        <br />
-        <br />
-        <br />
+    <div class="container" style="padding-top:1%;">
         @RenderBody()
     </div>
 
-    <br />
-    <br />
-    <br />
-    <div id="colofon" class="colofon red-text text-center">
-        <div class="row row-fixed">
-            <div class="col-lg-12 my-auto showcase-text">
-                <p class="lead mb-0 p-center">
-                    Avenida H. Escuela Naval Militar, número 669, piso 2 y 3, Colonia Presidentes Ejidales 1ra. Sección, Alcaldía Coyoacán, C.P. 04470, Ciudad de México.<br>Teléfono: 55.91.38.99.91<br>Opción 1<br>atencionciudadana@conavi.gob.mx
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://framework-gb.cdn.gob.mx/gobmx.js"></script>
+    <script src="https://framework-gb.cdn.gob.mx/gm/v3/assets/js/gobmx.js"></script>
 </body>
 </html>
+
+    <style>
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    .container {
+        flex: 1;
+    }
+
+    .main-footer {
+        padding: 10px 0;
+    }
+    </style>
