@@ -247,14 +247,65 @@
             }, 8000);
 
         }
+        // Prevenir reenvío de formulario
         function disableSubmitButton(event) {
             const submitButton = document.getElementById('btnFirma');
+            const form = document.getElementById('formSign');
+
+            // Verificar si ya se envió el formulario
+            if (sessionStorage.getItem('formSignSubmitted') === 'true') {
+                event.preventDefault();
+                alert('El formulario ya fue enviado. Por favor espere a que termine el proceso.');
+                return false;
+            }
+
+            // Verificar que hay archivos seleccionados
+            var arrayFiles = $('[id$=arrayCHK]').val();
+            if (!arrayFiles || arrayFiles.trim() === '') {
+                event.preventDefault();
+                alert('Debe seleccionar al menos un archivo para firmar.');
+                return false;
+            }
+
             if (submitButton) {
                 submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Firmando...';
             }
-            // Allow the form to submit
+
+            // Marcar como enviado en sessionStorage
+            sessionStorage.setItem('formSignSubmitted', 'true');
+            sessionStorage.setItem('formSignTime', Date.now().toString());
+
             return true;
         }
+
+        // Al cargar la página, verificar si hay un envío pendiente/duplicado
+        $(window).on('load', function() {
+            var submitted = sessionStorage.getItem('formSignSubmitted');
+            var submitTime = sessionStorage.getItem('formSignTime');
+
+            if (submitted === 'true' && submitTime) {
+                var elapsed = Date.now() - parseInt(submitTime);
+                // Si pasaron más de 5 minutos, limpiar el estado (timeout de seguridad)
+                if (elapsed > 300000) {
+                    sessionStorage.removeItem('formSignSubmitted');
+                    sessionStorage.removeItem('formSignTime');
+                }
+            }
+        });
+
+        // Limpiar estado cuando la navegación es exitosa (no es un refresh)
+        $(document).ready(function() {
+            // Si hay alerta de éxito o danger, limpiar el estado del formulario
+            // (significa que el proceso terminó, ya sea con éxito o error)
+            var alertElement = $('#alerta');
+            if (alertElement.length > 0) {
+                if (alertElement.hasClass('alert-success') || alertElement.hasClass('alert-danger')) {
+                    sessionStorage.removeItem('formSignSubmitted');
+                    sessionStorage.removeItem('formSignTime');
+                }
+            }
+        });
 
     </script>
 }

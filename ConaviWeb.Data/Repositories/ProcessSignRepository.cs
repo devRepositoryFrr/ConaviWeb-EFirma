@@ -92,12 +92,32 @@ namespace ConaviWeb.Data.Repositories
         }
         public async Task<IEnumerable<FileResponse>> GetFilesForSign(int idSystem, string arrayFiles, int estatus)
         {
-            var db = DbConnection();
+            // Dividir el array en bloques para evitar error "Data too long for column '_array'"
+            const int batchSize = 500;
+            var allFiles = new List<FileResponse>();
 
-            var sql = @"
-                        CALL sp_get_files_for_sign(@IdSystem, @ArrayFiles, @Estatus)";
+            if (string.IsNullOrEmpty(arrayFiles))
+            {
+                return allFiles;
+            }
 
-            return await db.QueryAsync<FileResponse>(sql, new { IdSystem = idSystem , ArrayFiles = arrayFiles , Estatus = estatus});
+            var ids = arrayFiles.Split(',', StringSplitOptions.RemoveEmptyEntries);
+            var batches = ids
+                .Select((id, index) => new { id, index })
+                .GroupBy(x => x.index / batchSize)
+                .Select(g => string.Join(",", g.Select(x => x.id)))
+                .ToList();
+
+            var sql = @"CALL sp_get_files_for_sign(@IdSystem, @ArrayFiles, @Estatus)";
+
+            foreach (var batch in batches)
+            {
+                using var db = DbConnection();
+                var files = await db.QueryAsync<FileResponse>(sql, new { IdSystem = idSystem, ArrayFiles = batch, Estatus = estatus });
+                allFiles.AddRange(files);
+            }
+
+            return allFiles;
         }
 
         public async Task<IEnumerable<FileResponse>> GetFilesForCancel(int iSystem, string arrayFiles)

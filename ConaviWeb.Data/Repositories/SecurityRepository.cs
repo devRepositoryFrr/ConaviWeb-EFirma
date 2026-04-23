@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ConaviWeb.Data.Repositories
 {
-    public class SecurityRepository:ISecurityRepository
+    public class SecurityRepository : ISecurityRepository
     {
         private readonly MySQLConfiguration _connectionString;
         public SecurityRepository(MySQLConfiguration connectionString)
@@ -20,26 +20,30 @@ namespace ConaviWeb.Data.Repositories
         {
             return new MySqlConnection(_connectionString.ConnectionString);
         }
+
         public async Task<UserResponse> GetLoginByCredentials(UserRequest login)
         {
-            try
-            {
-
-            
             var db = DbConnection();
 
             var sql = @"
                         SELECT id AS Id, concat(nombre,' ',primer_apellido,' ',segundo_apellido) Name, usuario AS SUser, id_rol AS Rol
                         FROM usuario WHERE usuario = @SUser AND password = @Password AND activo = 1 AND FIND_IN_SET(@Modulo,id_sistema)";
 
-            return await db.QueryFirstOrDefaultAsync<UserResponse>(sql, new { login.SUser, login.Password , login.Modulo});
-            }
-            catch (System.Exception e)
-            {
-
-                throw;
-            }
+            return await db.QueryFirstOrDefaultAsync<UserResponse>(sql, new { login.SUser, login.Password, login.Modulo });
         }
+
+        public async Task<int> UpdatePassword(string sUser, string newPasswordHash)
+        {
+            var db = DbConnection();
+
+            var sql = @"
+                        UPDATE usuario
+                        SET password = @NewPasswordHash
+                        WHERE usuario = @SUser AND activo = 1;";
+
+            return await db.ExecuteAsync(sql, new { SUser = sUser, NewPasswordHash = newPasswordHash });
+        }
+
         public async Task<UserResponse> GetLoginByUserId(int userId)
         {
             var db = DbConnection();

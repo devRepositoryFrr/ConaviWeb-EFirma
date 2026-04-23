@@ -1,10 +1,7 @@
 ﻿using ConaviWeb.Model;
 using ConaviWeb.Model.Request;
 using ConaviWeb.Model.Response;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace ConaviWeb.Data.Repositories
@@ -21,5 +18,7 @@ namespace ConaviWeb.Data.Repositories
         Task<Sistema> GetSystem(int idSystem);
         Task<IEnumerable<Firmados>> GetFirmados(int idParticion);
         Task<IEnumerable<Partition>> GetPartitionsBaja(int idSystem);
+
+        Task<int> UpdatePassword(string sUser, string newPasswordHash);
     }
 }

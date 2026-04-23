@@ -68,7 +68,7 @@ namespace ConaviWeb
             services.AddScoped<ISecurityTools, SecurityTools>();
             services.AddScoped<IUserRepository, UserRepository>();
             var appSettingSection = Configuration.GetSection("AppSettings");
-            //services.AddSingleton<HttpClient>();  Revisar el uso de esta inyecci髇
+            //services.AddSingleton<HttpClient>();  Revisar el uso de esta inyecci锟絥
             services.AddScoped<IProcessSignRepository, ProcessSignRepository>();
             services.AddScoped<IProcessSigningService, ProcessSigningService>();
             services.AddScoped<IProcessCancelService, ProcessCancelService>();
@@ -126,7 +126,9 @@ namespace ConaviWeb
 
                 if (response.StatusCode == 401 || response.StatusCode == 403)
                 {
-                    response.Redirect($"{pathBase}/");
+                    // Limpiar sesi贸n expirada o inv谩lida
+                    context.HttpContext.Session.Clear();
+                    response.Redirect($"{pathBase}/Login?expired=true");
                 }
                 else if (response.StatusCode == 404)
                 {
@@ -144,10 +146,33 @@ namespace ConaviWeb
             app.Use(async (context, next) =>
             {
                 var token = context.Session.GetString("Token");
+                var path = context.Request.Path.Value?.ToLower() ?? "";
+
+                // Rutas p煤blicas que no requieren autenticaci贸n
+                var publicPaths = new[] { "/login", "/createuser", "/css", "/js", "/lib", "/images", "/favicon" };
+                var isPublicPath = Array.Exists(publicPaths, p => path.StartsWith(p) || path == "/");
+
                 if (!string.IsNullOrEmpty(token))
                 {
-                    context.Request.Headers.Add("Authorization", "Bearer " + token);
+                    // Usar indexer en lugar de Add para evitar excepci贸n si ya existe
+                    if (!context.Request.Headers.ContainsKey("Authorization"))
+                    {
+                        context.Request.Headers["Authorization"] = "Bearer " + token;
+                    }
                 }
+                else if (!isPublicPath && context.Request.Method == "GET")
+                {
+                    // Sesi贸n expirada en ruta protegida - redirigir a login
+                    context.Response.Redirect("/Login");
+                    return;
+                }
+                else if (!isPublicPath && context.Request.Method == "POST")
+                {
+                    // Sesi贸n expirada en POST - redirigir a login con mensaje
+                    context.Response.Redirect("/Login?expired=true");
+                    return;
+                }
+
                 await next();
             });
 

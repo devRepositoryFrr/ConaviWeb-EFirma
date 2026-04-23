@@ -9,7 +9,6 @@ using ConaviWeb.Tools;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -23,14 +22,63 @@ namespace ConaviWeb.Controllers
     {
         private readonly ISecurityRepository _securityRepository;
         private readonly ISecurityTools _securityTools;
+
         public LoginController(ISecurityRepository securityRepository, ISecurityTools securityTools)
         {
             _securityRepository = securityRepository;
             _securityTools = securityTools;
         }
+
         public IActionResult Index()
         {
-                return View("../Login/Login");   
+            return View("../Login/Login");
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        public IActionResult ChangePassword()
+        {
+            return View("../Login/ChangePassword", new ChangePasswordRequest());
+        }
+
+        [AllowAnonymous]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword([FromForm] ChangePasswordRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View("../Login/ChangePassword", request);
+            }
+
+            // 1) Validar contraseña actual + módulo (misma regla que login)
+            var loginCheck = new UserRequest
+            {
+                SUser = request.SUser,
+                Password = _securityTools.GetSHA256(request.CurrentPassword),
+                Modulo = request.Modulo
+            };
+
+            var userResponse = await _securityRepository.GetLoginByCredentials(loginCheck);
+            if (userResponse == null)
+            {
+                ViewBag.Alert = AlertService.ShowAlert(Alerts.Danger, "Usuario/contraseña actual incorrectos o sin acceso al módulo");
+                return View("../Login/ChangePassword", request);
+            }
+
+            // 2) Actualizar password
+            var newHash = _securityTools.GetSHA256(request.NewPassword);
+            var rows = await _securityRepository.UpdatePassword(request.SUser, newHash);
+
+            if (rows <= 0)
+            {
+                ViewBag.Alert = AlertService.ShowAlert(Alerts.Danger, "No fue posible actualizar la contraseña");
+                return View("../Login/ChangePassword", request);
+            }
+
+            ViewBag.Alert = AlertService.ShowAlert(Alerts.Success, "Contraseña actualizada correctamente");
+            ModelState.Clear();
+            return View("../Login/ChangePassword", new ChangePasswordRequest { SUser = request.SUser, Modulo = request.Modulo });
         }
 
         [AllowAnonymous]
@@ -57,14 +105,14 @@ namespace ConaviWeb.Controllers
                 {
                     return (RedirectToAction("Error"));
                 }
-                
+
             }
             else
             {
                 ViewBag.Alert = AlertService.ShowAlert(Alerts.Danger, "Usuario y/o Contraseña incorrectos.");
                 return View("../Login/Login");
             }
-            
+
         }
 
         [Authorize]
