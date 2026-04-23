@@ -112,6 +112,8 @@ namespace ConaviWeb.Controllers
                 
                 if (sessionData.IdSistema == 5 || sessionData.IdSistema == 6)
                 {
+                    try
+                    {
                     var dataMail = await _processSignRepository.GetMailCarga(partition.Id);
                     var mail = new System.Text.StringBuilder();
                     mail.Append("<!DOCTYPE html><html><style>table {border:2px solid #b8925f;border-radius:10px;}</style> ");
@@ -127,6 +129,11 @@ namespace ConaviWeb.Controllers
                     mailRequest.Subject = "Notificación Firma Electrónica CONAVI.";
                     mailRequest.Body = mail.ToString();
                     bool send = await SendMail(mailRequest);
+                    }
+                    catch (Exception)
+                    {
+                        // El archivo ya se guardó correctamente; no interrumpir el flujo por fallo de correo
+                    }
                 }
                 
             TempData["Alert"] = AlertService.ShowAlert(Alerts.Success, "Se cargaron " + count + " archivos.");
@@ -147,12 +154,10 @@ namespace ConaviWeb.Controllers
                 await _mailService.SendEmailAsync(request);
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-
-                throw;
+                return false;
             }
-
         }
     }
 }

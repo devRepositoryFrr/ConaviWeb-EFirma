@@ -26,7 +26,7 @@ namespace ConaviWeb.Services
             }
             var email = new MimeMessage();
             email.Sender = MailboxAddress.Parse(_mailSetting.Mail);
-            //email.To.Add(MailboxAddress.Parse(mailRequest.ToEmail));
+            email.From.Add(MailboxAddress.Parse(_mailSetting.Mail));
             email.To.AddRange(list);
             email.Subject = mailRequest.Subject;
             var builder = new BodyBuilder();
