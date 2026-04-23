@@ -8,6 +8,7 @@ using ConaviWeb.Tools;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,9 +30,11 @@ namespace ConaviWeb.Controllers
         private readonly IUserRepository _userRepository;
         private readonly IProcessSignRepository _processSignRepository;
         private readonly IMailService _mailService;
-        public UploadFileController(IWebHostEnvironment environment, ISourceFileRepository sourceFileRepository, ISecurityTools securityTools, ISecurityRepository securityRepository, IUserRepository userRepository, IProcessSignRepository processSignRepository, IMailService mailService)
+        private readonly ILogger<UploadFileController> _logger;
+        public UploadFileController(IWebHostEnvironment environment, ISourceFileRepository sourceFileRepository, ISecurityTools securityTools, ISecurityRepository securityRepository, IUserRepository userRepository, IProcessSignRepository processSignRepository, IMailService mailService, ILogger<UploadFileController> logger)
         {
             _environment = environment;
+            _logger = logger;
             _sourceFileRepository = sourceFileRepository;
             _securityTools = securityTools;
             _securityRepository = securityRepository;
@@ -130,9 +133,9 @@ namespace ConaviWeb.Controllers
                     mailRequest.Body = mail.ToString();
                     bool send = await SendMail(mailRequest);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        // El archivo ya se guardó correctamente; no interrumpir el flujo por fallo de correo
+                        _logger.LogError(ex, "Error al enviar correo de notificación para partición {ParticionId}", partition.Id);
                     }
                 }
                 

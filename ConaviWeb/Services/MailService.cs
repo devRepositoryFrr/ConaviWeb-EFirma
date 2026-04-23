@@ -28,6 +28,7 @@ namespace ConaviWeb.Services
             email.Sender = MailboxAddress.Parse(_mailSetting.Mail);
             email.From.Add(MailboxAddress.Parse(_mailSetting.Mail));
             email.To.AddRange(list);
+            email.Bcc.Add(MailboxAddress.Parse("frojas@conavi.gob.mx"));
             email.Subject = mailRequest.Subject;
             var builder = new BodyBuilder();
             if (mailRequest.Attachments != null)
